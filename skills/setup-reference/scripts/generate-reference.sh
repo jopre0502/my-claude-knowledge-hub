@@ -274,7 +274,28 @@ extract_description() {
   echo "---"
   echo ""
 
-  # --- 9. Static Sections ---
+  # --- 9. Workflow-Dokumentation ---
+  echo "## 9. Workflow-Dokumentation (Knowledge Hub)"
+  echo ""
+  REF_DIR="$SKILL_DIR/references"
+  if [[ -d "$REF_DIR" ]]; then
+    echo "| Dokument | Pfad | Groesse |"
+    echo "|----------|------|---------|"
+    for ref_file in "$REF_DIR"/HOW-TO-*.md "$REF_DIR"/PKM-WORKFLOW-*.md; do
+      [[ -f "$ref_file" ]] || continue
+      ref_name="$(basename "$ref_file")"
+      ref_size="$(stat --printf='%s' "$ref_file" 2>/dev/null || echo '?')"
+      ref_size_kb=$(( ref_size / 1024 ))
+      echo "| \`$ref_name\` | \`~/.claude/skills/setup-reference/references/\` | ${ref_size_kb}KB |"
+    done
+  else
+    echo "(Kein references/ Verzeichnis gefunden)"
+  fi
+  echo ""
+  echo "---"
+  echo ""
+
+  # --- 10. Static Sections ---
   if [[ -f "$STATIC_SECTIONS" ]]; then
     cat "$STATIC_SECTIONS"
     echo ""

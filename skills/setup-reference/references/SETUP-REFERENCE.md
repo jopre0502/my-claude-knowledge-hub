@@ -1,4 +1,4 @@
-# SETUP-REFERENCE — Auto-generated: 2026-02-20 12:03
+# SETUP-REFERENCE — Auto-generated: 2026-02-22 14:42
 
 Generiert aus Live-System (`~/.claude/`). Nicht manuell bearbeiten.
 
@@ -185,7 +185,7 @@ Generiert aus Live-System (`~/.claude/`). Nicht manuell bearbeiten.
 
 | Setting | Wert |
 |---------|------|
-| `model` | opus |
+| `model` | default |
 | `outputStyle` | Executive Communication |
 | `effortLevel` | medium |
 | `preferredNotifChannel` | terminal_bell |
@@ -199,6 +199,15 @@ Generiert aus Live-System (`~/.claude/`). Nicht manuell bearbeiten.
 | `n8n.env` | 74B |
 | `obsidian.env` | 252B |
 | `vault.env` | 223B |
+
+---
+
+## 9. Workflow-Dokumentation (Knowledge Hub)
+
+| Dokument | Pfad | Groesse |
+|----------|------|---------|
+| `HOW-TO-PROJEKT-AUTOMATION.md` | `~/.claude/skills/setup-reference/references/` | 26KB |
+| `PKM-WORKFLOW-VAULT-MANAGER.md` | `~/.claude/skills/setup-reference/references/` | 12KB |
 
 ---
 
@@ -277,5 +286,5 @@ ENDE   -> Commit -> /session-refresh -> Optional: Session-Handoff
 
 ---
 
-*Generiert: 2026-02-20 12:03 | Script: generate-reference.sh*
+*Generiert: 2026-02-22 14:42 | Script: generate-reference.sh*
 *Naechste Aktualisierung: /refresh-reference ausfuehren*
