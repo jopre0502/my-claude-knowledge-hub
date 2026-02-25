@@ -1,4 +1,4 @@
-# SETUP-REFERENCE — Auto-generated: 2026-02-22 14:42
+# SETUP-REFERENCE — Auto-generated: 2026-02-25 18:08
 
 Generiert aus Live-System (`~/.claude/`). Nicht manuell bearbeiten.
 
@@ -36,9 +36,10 @@ Generiert aus Live-System (`~/.claude/`). Nicht manuell bearbeiten.
 | Agent | Beschreibung |
 |-------|-------------|
 | `my-setup-guide` | Beantwortet Fragen zur persoenlichen Claude Code Installation, Konfiguration, Skills, Workflows und Conventions. Kenn... |
+| `obsidian-pilot` | Navigates Obsidian CLI commands dynamically. Use for complex vault operations that go beyond simple read/search: base... |
 | `prompt-architect` | Meta-Orchestrator für Prompt-Engineering und Skill-Architektur. Analysiert komplexe Anfragen, empfiehlt proaktiv Skill-Auslagerung, koordiniert prompt-improver Skill und skill-creator. Für Architektur-Entscheidungen und Multi-Skill-Workflows. |
 
-**Gesamt:** 2 Agents
+**Gesamt:** 3 Agents
 
 ---
 
@@ -65,8 +66,9 @@ Generiert aus Live-System (`~/.claude/`). Nicht manuell bearbeiten.
 | SessionStart | `session-env-loader.sh` | 10s |
 | SessionStart | `session-handoff-loader.sh` | 15s |
 | Notification | `notify.sh` | defaults |
+| (jq Fehler) | — | — |
 
-**Gesamt:** 5 Hooks
+**Gesamt:** 6 Hooks
 
 ---
 
@@ -196,9 +198,9 @@ Generiert aus Live-System (`~/.claude/`). Nicht manuell bearbeiten.
 
 | Datei | Groesse |
 |-------|---------|
-| `n8n.env` | 74B |
-| `obsidian.env` | 252B |
-| `vault.env` | 223B |
+| `n8n.env` | 1204B |
+| `obsidian.env` | 1883B |
+| `vault.env` | 1637B |
 
 ---
 
@@ -206,7 +208,7 @@ Generiert aus Live-System (`~/.claude/`). Nicht manuell bearbeiten.
 
 | Dokument | Pfad | Groesse |
 |----------|------|---------|
-| `HOW-TO-PROJEKT-AUTOMATION.md` | `~/.claude/skills/setup-reference/references/` | 26KB |
+| `HOW-TO-PROJEKT-AUTOMATION.md` | `~/.claude/skills/setup-reference/references/` | 28KB |
 | `PKM-WORKFLOW-VAULT-MANAGER.md` | `~/.claude/skills/setup-reference/references/` | 12KB |
 
 ---
@@ -286,5 +288,5 @@ ENDE   -> Commit -> /session-refresh -> Optional: Session-Handoff
 
 ---
 
-*Generiert: 2026-02-22 14:42 | Script: generate-reference.sh*
+*Generiert: 2026-02-25 18:08 | Script: generate-reference.sh*
 *Naechste Aktualisierung: /refresh-reference ausfuehren*
