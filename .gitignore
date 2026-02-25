@@ -32,6 +32,17 @@
 !hooks/
 !hooks/*
 
+# ===== WHITELIST: Output Styles =====
+!output-styles/
+!output-styles/*
+
+# ===== WHITELIST: Assets =====
+!assets/
+!assets/*
+
+# ===== WHITELIST: Statusline =====
+!statusline.sh
+
 # ===== EXPLICIT DENIES (safety net) =====
 # Credentials and secrets
 .credentials.json

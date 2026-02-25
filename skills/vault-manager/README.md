@@ -25,10 +25,11 @@ User: "Nutze vault:ai-workflows als Kontext"
 ├── SKILL.md                           # Main skill (auto-triggered)
 │
 ├── scripts/                           # Executable scripts
-│   ├── vault-find.sh                  # Discovery (Recursive Search)
-│   ├── vault-read.sh                  # Read + YAML parsing
-│   ├── vault-export.sh                # Export to Vault (UC2)
-│   └── vault-edit.sh                  # Edit with diff + backup (UC3)
+│   ├── vault-base.sh                  # Base Query Engine
+│   ├── vault-copy.sh                  # Copy/Move files into Vault
+│   ├── vault-date.sh                  # Date-range filters
+│   ├── vault-edit.sh                  # Edit with diff + backup (UC3)
+│   └── vault-export.sh                # Export to Vault (UC2)
 │
 ├── references/                        # Documentation
 │   ├── SETUP.md                       # Installation guide
@@ -88,38 +89,22 @@ vault:document-name
 
 ---
 
-## 🔧 Scripts
+## 🔧 Discovery & Read (CLI/MCP)
 
-### vault-find.sh
-**Purpose:** Discover Vault documents by name
+### Document Discovery
+**Method:** MCP Tool `obsidian_simple_search` oder CLI `obsidian.com search`
 
-**Recursive Search:**
-- Case-insensitive recursive search via `find`
-- Performance: ~100-500ms (ausreichend für typische Vault-Größen)
-- Handles multiple matches (zeigt Kandidaten, nutzt ersten Match)
+- Nutzt Obsidian's internen Index (schnell, case-insensitive)
+- Voraussetzung: Obsidian App muss laufen
+- Fallback: Glob Tool mit Pattern `**/*name*.md` auf `$OBSIDIAN_VAULT`
 
-**Usage:**
-```bash
-~/.claude/skills/vault-manager/scripts/vault-find.sh "document-name"
+### Document Read
+**Method:** MCP Tool `obsidian_get_file_contents` oder CLI `obsidian.com read`
 
-# Returns: /absolute/path/to/document.md
-```
+- Liest Dateiinhalt inkl. Frontmatter
+- Metadata-Extraktion via `obsidian.com properties file="<path>" format=yaml`
 
-### vault-read.sh
-**Purpose:** Read document content with YAML frontmatter extraction
-
-**Features:**
-- Extracts metadata (created, modified, tags, status, type)
-- Displays formatted output with colors
-- Handles error cases gracefully
-- Works with documents without frontmatter
-
-**Usage:**
-```bash
-~/.claude/skills/vault-manager/scripts/vault-read.sh "/absolute/path/to/file.md"
-
-# Returns: Document loaded message + metadata + content
-```
+> **Hinweis:** vault-find.sh und vault-read.sh wurden bei TASK-027 (CLI Migration, 2026-02-19) durch CLI/MCP ersetzt und geloescht.
 
 ---
 
@@ -168,7 +153,7 @@ All testing focuses on validating these functions:
 
 ## Current Status
 
-- **UC1 Read:** ✅ Complete (vault-find.sh, vault-read.sh)
+- **UC1 Read:** ✅ Complete (CLI/MCP: search, read, properties)
 - **UC2 Export:** ✅ Complete (vault-export.sh, 7 Fileclass-Typen)
 - **UC3 Edit:** ✅ Complete (vault-edit.sh, /vault-work Command)
 - **Phase 6+:** MCP/RAG Evaluation (Semantic Search, Backlinks)
@@ -195,15 +180,15 @@ All testing focuses on validating these functions:
 ### vault: Prefix Auto-Triggering
 - User types: `vault:document-name`
 - Skill detects: `vault:` prefix pattern via semantic matching
-- Skill executes: vault-find.sh + vault-read.sh
+- Skill executes: MCP search + read (oder CLI obsidian.com)
 - Result: Document loaded as context
 
 **Note:** `@` notation wird NICHT verwendet (Kollision mit Claude Code's nativer `@file` Auto-Completion).
 
-### Recursive Search Discovery
-- Recursive search via vault-find.sh (`find` command)
-- Case-insensitive, handles partial matches
-- No index file needed
+### CLI/MCP Discovery
+- Discovery via MCP `obsidian_simple_search` oder CLI `obsidian.com search`
+- Nutzt Obsidian's internen Index (schnell, case-insensitive)
+- Fallback: Glob Tool bei nicht-laufendem Obsidian
 
 ### YAML Frontmatter Extraction
 - Documents have optional YAML metadata at top:
@@ -234,12 +219,11 @@ export OBSIDIAN_VAULT="/path/to/your/vault"
 See `references/SETUP.md` for detailed setup.
 
 ### Document Discovery
-Discovery uses recursive search via `vault-find.sh`. No index file needed.
+Discovery via MCP `obsidian_simple_search` oder CLI `obsidian.com search`. Kein Index-File noetig.
 
 ```bash
-# Usage:
-~/.claude/skills/vault-manager/scripts/vault-find.sh "document-name"
-# Returns: /absolute/path/to/document.md
+# CLI Usage (wenn Obsidian laeuft):
+obsidian.com search query="document-name" format=json
 ```
 
 ---
@@ -277,7 +261,7 @@ Discovery uses recursive search via `vault-find.sh`. No index file needed.
 | Component | Status | Details |
 |-----------|--------|---------|
 | **Skill (SKILL.md)** | ✅ Ready | Auto-triggered via `vault:` prefix |
-| **Scripts** | ✅ Ready | vault-find.sh, vault-read.sh, vault-export.sh, vault-edit.sh |
+| **Scripts** | ✅ Ready | vault-base.sh, vault-copy.sh, vault-date.sh, vault-edit.sh, vault-export.sh |
 | **Commands** | ✅ Ready | /vault-export, /vault-work, /obsidian-sync |
 | **Environment** | ✅ Ready | OBSIDIAN_VAULT via SessionStart Hook |
 | **Documentation** | ✅ Ready | SETUP.md, REFERENCE.md |

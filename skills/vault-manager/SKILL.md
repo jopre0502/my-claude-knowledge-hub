@@ -65,7 +65,7 @@ native `@file` auto-completion feature. Always use `vault:` prefix for Vault ref
 
 ## UC1: Read-Only Vault Reference Implementation
 
-### Workflow
+### Workflow (mit CLI Healthcheck + Fallback-Kaskade)
 
 ```
 1. User Input Detection
@@ -73,32 +73,45 @@ native `@file` auto-completion feature. Always use `vault:` prefix for Vault ref
       ├─ YES → Continue
       └─ NO → Skill not triggered
 
-2. Document Discovery (CLI)
-   └─ obsidian.com search query="<name>" format=json
-      ├─ Obsidian internal index (fast, case-insensitive)
-      ├─ Returns matches with context
-      └─ Prerequisite: Obsidian App muss laufen
+2. CLI Healthcheck (EINMAL pro Session, Ergebnis merken)
+   └─ Bash: obsidian.com version > /tmp/obsidian-cli-check.txt 2>&1; echo $?
+      ├─ Exit 0 + sinnvoller Output? → CLI_AVAILABLE=true
+      └─ Exit != 0 ODER "Error"/"not found" im Output?
+         → CLI_AVAILABLE=false
+         → KEIN weiterer CLI-Versuch in dieser Session
+         → Hinweis: "CLI nicht verfuegbar, nutze Filesystem-Fallback"
 
-3. Content Loading (CLI)
-   └─ obsidian.com read file="<path>"
-      ├─ Read file content (full)
-      └─ obsidian.com properties file="<path>" format=yaml
-         ├─ Extract metadata (created, modified, tags, status, type)
-         └─ Structured output (YAML/TSV)
+3. Document Discovery
+   └─ CLI_AVAILABLE?
+      ├─ TRUE → obsidian.com search query="<name>" format=json
+      └─ FALSE → Glob Tool: $OBSIDIAN_VAULT/**/*<name>*.md
+         (Nur Dateinamen-Match, kein Content-Search)
 
-4. Context Presentation
-   └─ Display metadata + content
+4. Content Loading
+   └─ CLI_AVAILABLE?
+      ├─ TRUE → obsidian.com read file="<path>"
+      │         + obsidian.com properties file="<path>" format=yaml
+      └─ FALSE → Read Tool direkt auf $OBSIDIAN_VAULT/<path>
+         (Frontmatter manuell aus YAML-Block parsen)
+
+5. Context Presentation
+   └─ Display metadata + content (identisch fuer beide Pfade)
       ├─ Show frontmatter (dates, tags, status)
       ├─ Make content available as context
       ├─ Ready for Claude to use in analysis/writing
       └─ NO WRITES (read-only)
 
-5. Error Handling
+6. Error Handling
    └─ If any step fails:
-      ├─ "Obsidian not running" → Anleitung: Obsidian App starten
-      ├─ "File not found" → Suggest alternative search terms
+      ├─ CLI Healthcheck failed → Automatisch Fallback (kein User-Eingriff)
+      ├─ Glob findet nichts → Suggest alternative search terms
+      ├─ $OBSIDIAN_VAULT nicht gesetzt → Setup-Anleitung zeigen
       └─ Provide setup guidance if needed
 ```
+
+**WICHTIG:** Nach einem fehlgeschlagenen CLI-Healthcheck KEINE weiteren CLI-Calls in
+dieser Session versuchen. Der Fallback (Glob + Read) deckt alle Read-Operationen ab.
+Nur CLI-exklusive Features (Backlinks, Vault Health) sind im Fallback nicht verfuegbar.
 
 ### Tools (CLI+Bash Hybrid — ADR-005)
 
@@ -178,6 +191,13 @@ Symptom: CLI-Commands hängen oder geben "connection refused"
 Solution: Obsidian App starten, dann erneut versuchen
 Fallback: Glob + Read Tools direkt auf `$OBSIDIAN_VAULT` verwenden
 
+**Issue 5: CLI broken (Session-Token Bug o.ae.)**
+Symptom: `obsidian.com version` → "Error: Command session=... not found"
+Root Cause: Shim/App Version-Mismatch nach Auto-Update
+Workaround: Fallback-Kaskade greift automatisch (Glob + Read)
+Fix: Obsidian Installer auf gleiche Version wie App aktualisieren
+Hinweis: KEIN wiederholtes CLI-Probieren — nach einem Fehlschlag sofort Fallback
+
 **Issue 3: Document not found**
 Solution:
 1. Test discovery: `obsidian.com search query="name"`
@@ -215,20 +235,36 @@ Skill Flow:
 
 ---
 
-## Discovery: CLI Search
+## Discovery: Fallback-Kaskade
 
-### Primary: Obsidian Search (CLI)
+### Stufe 1: CLI Search (wenn verfuegbar)
 
 Method: `obsidian.com search query="<name>" format=json`
 Performance: Fast (uses Obsidian's internal index, not filesystem scan)
 Features: Case-insensitive, content + filename matching, context snippets
-Prerequisite: Obsidian App must be running
+Prerequisite: CLI Healthcheck muss bestanden sein (siehe UC1 Workflow Schritt 2)
 
-### Fallback: Glob (wenn Obsidian nicht laeuft)
+### Stufe 2: Glob Fallback (wenn CLI nicht verfuegbar)
 
 Method: Glob tool mit Pattern `**/*<name>*.md` auf `$OBSIDIAN_VAULT`
 Performance: ~500-1000ms (filesystem scan)
 Hinweis: Nur Dateinamen-Match, kein Content-Search
+Trigger: Automatisch wenn CLI Healthcheck fehlschlaegt
+
+### Stufe 3: Fehlermeldung (wenn Glob nichts findet)
+
+Dokument nicht gefunden → alternative Suchbegriffe vorschlagen, Pfad prüfen
+
+### Nicht verfuegbar im Fallback-Modus
+
+Folgende CLI-exklusive Features funktionieren NUR mit laufender Obsidian App:
+- `backlinks` / `links` (Incoming/Outgoing Links)
+- `orphans` / `deadends` / `unresolved` (Vault Health)
+- `vault info` (Vault-Statistiken)
+- Content-Search (Volltext-Suche innerhalb von Dokumenten)
+
+Bei Anfrage dieser Features im Fallback-Modus → klare Meldung:
+"Diese Funktion erfordert eine laufende Obsidian App. Bitte Obsidian starten und erneut versuchen."
 
 ---
 

@@ -176,16 +176,15 @@ Mache einen kurzen **Final-Check**:
 
 **Vault-Referenzen (`vault:`) — Pflicht-Workflow:**
 1. User gibt `vault:"Dokumentname"` als Input → **Main-Session** löst auf:
-   ```bash
-   source ~/.config/secrets/env.d/vault.env && vault-find.sh "<name>"
-   source ~/.config/secrets/env.d/vault.env && vault-read.sh "<pfad>"
-   ```
+   - MCP Tool `obsidian_simple_search` für Discovery
+   - MCP Tool `obsidian_get_file_contents` für Content
+   - (Voraussetzung: Obsidian App muss laufen)
 2. Aufgelösten **Klartext** an Subagent übergeben (im `prompt:` Parameter)
 3. **NIEMALS** eine `vault:` Referenz unaufgelöst an einen Subagent weiterreichen
 
 **Secrets/API-Keys — gleiches Prinzip:**
 - API-Calls die Secrets brauchen → Main-Session ausführen, Ergebnis an Subagent
-- Oder: Secret explizit in den Bash-Befehl des Subagents inlinen (`source ~/.config/secrets/env.d/<file>.env && ...`)
+- Oder: Secret via `secret-run` im Bash-Befehl des Subagents laden (`secret-run <profil> -- <command>`)
 
 **Warum:** SessionStart Hook setzt `CLAUDE_ENV_FILE` → Main-Session lädt env vars. Task-Subagents starten in isoliertem Kontext ohne diese env vars. Das ist by design (Sicherheit), aber erfordert bewusstes Handling.
 

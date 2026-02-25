@@ -6,105 +6,44 @@
 
 ## Scripts Reference
 
-### vault-find.sh <name>
+### Document Discovery (CLI/MCP — ersetzt vault-find.sh)
 
-**Purpose:** Recursive document discovery
-
-**Location:** `~/.claude/skills/vault-manager/scripts/vault-find.sh`
+**Method:** MCP Tool `obsidian_simple_search` oder CLI `obsidian.com search`
 
 **Usage:**
 ```bash
-vault-find.sh <document-name>
-vault-find.sh ai-workflows
-vault-find.sh "project-x"
+# CLI
+obsidian.com search query="document-name" format=json
+
+# MCP Tool (in Claude Code)
+obsidian_simple_search(query="document-name")
 ```
 
-**Output:**
-```
-# Success (exact match)
-/path/to/vault/04 RESSOURCEN/ai-workflows.md
+**Voraussetzung:** Obsidian App muss laufen (CLI kommuniziert via Named Pipe)
+**Fallback:** Glob Tool mit Pattern `**/*name*.md` auf `$OBSIDIAN_VAULT`
 
-# Success (partial match)
-/path/to/vault/04 RESSOURCEN/ai-workflows.md
-
-# Multiple matches
-⚠️  Multiple documents found:
-  1) 02_Areas/ai-workflows.md
-  2) 04_Archive/ai-workflows-old.md
-Use the first match (default):
-/path/to/vault/02_Areas/ai-workflows.md
-
-# Not found
-❌ Error: Document not found
-Searched for: vault:ai-workflows
-...
-```
-
-**Exit Codes:**
-- `0` - Success, document found
-- `1` - Error, document not found
-
-**Performance:**
-- Exact match: < 100ms
-- Partial match (fallback): 500-1000ms depending on vault size
-
-**Implementation Details:**
-- Normalizes document name (removes vault: or legacy @ prefix)
-- Validates vault path exists
-- Exact filename match first, then partial match fallback
-- Excludes .obsidian + .trash directories
+> vault-find.sh wurde bei TASK-027 (CLI Migration, 2026-02-19) geloescht.
 
 ---
 
-### vault-read.sh <path>
+### Document Read (CLI/MCP — ersetzt vault-read.sh)
 
-**Purpose:** Read document with YAML frontmatter extraction
-
-**Location:** `~/.claude/skills/vault-manager/scripts/vault-read.sh`
+**Method:** MCP Tool `obsidian_get_file_contents` oder CLI `obsidian.com read`
 
 **Usage:**
 ```bash
-vault-read.sh "/path/to/vault/02_Areas/ai-workflows.md"
+# CLI
+obsidian.com read file="path/to/document.md"
+obsidian.com properties file="path/to/document.md" format=yaml
+
+# MCP Tool (in Claude Code)
+obsidian_get_file_contents(filepath="path/to/document.md")
 ```
 
-**Output:**
-```
-✅ Document loaded
+**Voraussetzung:** Obsidian App muss laufen
+**Metadata:** `obsidian.com properties` liefert Frontmatter als YAML/TSV
 
-Metadata:
-  File: ai-workflows.md
-  Path: 02_Areas/ai-workflows.md
-  Created: 2025-12-15
-  Modified: 2026-01-17
-  Status: active
-  Type: note
-  Tags:
-    #ai
-    #workflows
-    #concepts
-  Size: 5247 bytes
-
-Content:
----
-[Full document content...]
----
-```
-
-**Exit Codes:**
-- `0` - Success
-- `1` - Error (file not found, not readable, etc.)
-
-**Error Handling:**
-- File not found: "Error: File not found"
-- File not readable: "Error: File not readable"
-- Frontmatter parse error: Shows raw frontmatter block
-
-**Implementation Details:**
-- Extracts YAML between first two `---` markers
-- Parses key-value pairs (created, modified, tags, status, type)
-- Handles inline arrays `[item1, item2]`
-- Shows relative path (relative to vault root)
-- Colors output for readability
+> vault-read.sh wurde bei TASK-027 (CLI Migration, 2026-02-19) geloescht.
 
 ---
 
@@ -398,14 +337,14 @@ OBSIDIAN_VAULT=/path/to/vault claude code
 
 ### Script Integration
 
-Discovery and read scripts are standalone Bash scripts:
+Discovery and read via CLI/MCP (Obsidian muss laufen):
 ```bash
-# Can be used independently from terminal
-vault-find.sh document-name
-vault-read.sh /absolute/path
+# CLI (Terminal)
+obsidian.com search query="document-name" format=json
+obsidian.com read file="path/to/doc.md"
 
-# Or from Claude Code via vault-manager skill (auto-triggered)
-# Or via commands: /vault-work, /vault-export
+# MCP Tools (Claude Code, auto-triggered via vault-manager skill)
+# Oder via commands: /vault-work, /vault-export
 ```
 
 ### Environment Setup
@@ -422,11 +361,11 @@ vault-read.sh /absolute/path
 ### Enable verbose output
 
 ```bash
-# Trace discovery
-bash -x vault-find.sh ai-workflows
+# Test discovery (Obsidian muss laufen)
+obsidian.com search query="ai-workflows" format=json
 
-# Trace reading
-bash -x vault-read.sh /path/to/doc.md
+# Test reading
+obsidian.com read file="path/to/doc.md"
 ```
 
 ### Check environment

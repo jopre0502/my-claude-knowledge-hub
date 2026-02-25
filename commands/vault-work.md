@@ -26,22 +26,19 @@ Wenn der User `/vault-work` aufruft:
 
 ### 1. Dokument laden
 
-Finde und lade das Dokument:
+Finde und lade das Dokument via MCP Tools:
 
-```bash
-# Guard: Vault-Pfad verifizieren
-if [ ! -d "$OBSIDIAN_VAULT/.obsidian" ]; then
-  echo "ERROR: $OBSIDIAN_VAULT ist kein Obsidian Vault (.obsidian/ fehlt)"; exit 1
-fi
+1. Falls `$ARGUMENTS` leer ist, frage den User: "Welches Dokument moechten Sie bearbeiten?"
 
-# Dokument finden
-DOC_PATH=$(~/.claude/skills/vault-manager/scripts/vault-find.sh "$ARGUMENTS")
+2. **Discovery:** Nutze das MCP Tool `obsidian_simple_search` mit dem Dokumentnamen als Query:
+   - Suche nach `$ARGUMENTS` (Dokumentname)
+   - Ergebnis: Dateipfad(e) im Vault
 
-# Dokument lesen
-~/.claude/skills/vault-manager/scripts/vault-read.sh "$DOC_PATH"
-```
+3. **Content laden:** Nutze das MCP Tool `obsidian_get_file_contents` mit dem gefundenen Pfad:
+   - Liest Inhalt inkl. Frontmatter
+   - Zeigt Metadaten + Content an
 
-Falls `$ARGUMENTS` leer ist, frage den User: "Welches Dokument moechten Sie bearbeiten?"
+**Fallback** (wenn Obsidian nicht laeuft): Glob Tool mit Pattern `**/*$ARGUMENTS*.md` auf `$OBSIDIAN_VAULT`, dann Read Tool.
 
 ### 2. Dokument anzeigen
 
@@ -65,11 +62,11 @@ Der User beschreibt die gewuenschten Aenderungen. Claude hilft beim:
 Nachdem der User die Aenderungen beschrieben hat, nutze vault-edit.sh:
 
 ```bash
-# Zuerst Dry-Run (Diff zeigen)
-echo "<neuer-content>" | ~/.claude/skills/vault-manager/scripts/vault-edit.sh --dry-run "$ARGUMENTS"
+# Zuerst Dry-Run (Diff zeigen) — nutze --path mit dem bereits bekannten Pfad
+echo "<neuer-content>" | ~/.claude/skills/vault-manager/scripts/vault-edit.sh --dry-run --path "$BEKANNTER_PFAD"
 
 # Nach Bestaetigung: Real write
-echo "<neuer-content>" | ~/.claude/skills/vault-manager/scripts/vault-edit.sh "$ARGUMENTS"
+echo "<neuer-content>" | ~/.claude/skills/vault-manager/scripts/vault-edit.sh --path "$BEKANNTER_PFAD"
 ```
 
 **Wichtig:**
@@ -89,7 +86,7 @@ Zeige dem User:
 
 Wenn das Vault-Dokument bereits in dieser Session geladen wurde (Pfad und Content bekannt):
 
-1. **NICHT** erneut vault-find.sh oder vault-read.sh aufrufen
+1. **NICHT** erneut MCP Search oder Read aufrufen
 2. Direkt vault-edit.sh mit `--path` Flag nutzen:
 
 ```bash
@@ -102,7 +99,7 @@ echo "<neuer-content>" | ~/.claude/skills/vault-manager/scripts/vault-edit.sh --
 
 **Wann Warm-Path nutzen:**
 - User hat `vault:dokument` geladen, Aenderungen diskutiert, und will jetzt speichern
-- Pfad wurde schon von vault-find.sh zurueckgegeben (in dieser Session)
+- Pfad wurde schon von MCP Search zurueckgegeben (in dieser Session)
 - Dokument wurde bereits gelesen und Content ist im Kontext
 
 **Wann Cold-Start nutzen:**
@@ -129,14 +126,14 @@ Dokument nicht gefunden: <name>
 
 Tipps:
 1. Pruefe die Schreibweise
-2. Nutze vault-find.sh <name> fuer die Suche
+2. Nutze MCP obsidian_simple_search fuer die Suche
 3. Das Dokument muss im Vault existieren
 ```
 
 ## Technische Details
 
-- **Find-Script:** `~/.claude/skills/vault-manager/scripts/vault-find.sh`
-- **Read-Script:** `~/.claude/skills/vault-manager/scripts/vault-read.sh`
+- **Discovery:** MCP Tool `obsidian_simple_search` (Obsidian muss laufen)
+- **Read:** MCP Tool `obsidian_get_file_contents` (Obsidian muss laufen)
 - **Edit-Script:** `~/.claude/skills/vault-manager/scripts/vault-edit.sh`
 - **Zielordner:** Bestehendes Dokument wird in-place aktualisiert
 - **Backup:** Automatisch als `.bak` vor Ueberschreiben
@@ -144,10 +141,11 @@ Tipps:
 
 ## Referenzen
 
-- `docs/PKM-WORKFLOW.md` - Vault-Integration-Dokumentation
+- `~/.claude/skills/setup-reference/references/PKM-WORKFLOW-VAULT-MANAGER.md` - Vault-Integration-Dokumentation (Knowledge Hub)
 - `~/.claude/skills/vault-manager/scripts/vault-edit.sh` - Edit-Script
 - `~/.claude/commands/vault-export.md` - Export-Command (aehnliches Pattern)
 
 ---
 
 **Erstellt:** 2026-02-10 (TASK-016)
+**Aktualisiert:** 2026-02-23 (TASK-033 — vault-find.sh/vault-read.sh → MCP Tools)

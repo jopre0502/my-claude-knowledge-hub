@@ -30,7 +30,7 @@ Layer 4: SESSION    -> CLAUDE_ENV_FILE (SessionStart Hook, aktuell Bug #15840)
 Sub-Agents (Task tool) erben KEINE Environment-Variablen aus dem SessionStart Hook.
 - `vault:` Referenzen MUESSEN in der Main-Session aufgeloest werden
 - Secrets in Main-Session lesen, Klartext an Subagent uebergeben
-- Oder: `source ~/.config/secrets/env.d/<file>.env && ...` im Bash-Befehl
+- Oder: `secret-run <profil> -- <command>` im Bash-Befehl
 
 ---
 

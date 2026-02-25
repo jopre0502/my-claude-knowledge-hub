@@ -22,15 +22,17 @@ OBSIDIAN_VAULT="/mnt/c/Users/Jonas/Google Drive/01. Prechtel_Documents/250_Obsid
 
 ### 3. ✅ Document Discovery (Automatic)
 
-Discovery erfolgt via **Recursive Search** (`vault-find.sh`). Keine Index-Datei notwendig.
+Discovery erfolgt via **CLI/MCP** (Obsidian muss laufen). Keine Index-Datei notwendig.
 
 ```bash
-# vault-find.sh sucht rekursiv im $OBSIDIAN_VAULT
-~/.claude/skills/vault-manager/scripts/vault-find.sh "document-name"
-# Returns: /absolute/path/to/document.md
+# CLI: Obsidian Search (nutzt internen Index)
+obsidian.com search query="document-name" format=json
+
+# MCP Tool (in Claude Code, automatisch via vault-manager Skill)
+obsidian_simple_search(query="document-name")
 ```
 
-**Performance:** ~100-500ms (ausreichend für typische Vault-Größen).
+**Performance:** Schnell (nutzt Obsidian's internen Index, kein Filesystem-Scan).
 
 ---
 
@@ -43,8 +45,11 @@ The skill is already installed at:
 ~/.claude/skills/vault-manager/
 ├── SKILL.md                    # Main skill (auto-loaded)
 ├── scripts/
-│   ├── vault-find.sh          # Document discovery
-│   └── vault-read.sh          # Content reading
+│   ├── vault-base.sh          # Base Query Engine
+│   ├── vault-copy.sh          # Copy/Move files
+│   ├── vault-date.sh          # Date-range filters
+│   ├── vault-edit.sh          # Edit with diff + backup
+│   └── vault-export.sh        # Export to Vault
 └── references/
     ├── SETUP.md               # You are here
     └── REFERENCE.md           # Technical reference
@@ -53,8 +58,7 @@ The skill is already installed at:
 **Verify scripts are executable:**
 ```bash
 ls -la ~/.claude/skills/vault-manager/scripts/
-# Should show: -rwxr-xr-x ... vault-find.sh
-#              -rwxr-xr-x ... vault-read.sh
+# Should show: -rwxr-xr-x ... vault-base.sh, vault-copy.sh, vault-date.sh, vault-edit.sh, vault-export.sh
 ```
 
 ### Step 2: Set OBSIDIAN_VAULT Environment Variable
@@ -101,8 +105,8 @@ echo $OBSIDIAN_VAULT
 # Check scripts are executable
 ls -la ~/.claude/skills/vault-manager/scripts/*.sh
 
-# Test discovery
-~/.claude/skills/vault-manager/scripts/vault-find.sh "test"
+# Test discovery (Obsidian muss laufen)
+obsidian.com search query="test" format=json
 ```
 
 ---
@@ -130,13 +134,13 @@ User: "Nutze vault:ai-workflows als Kontext"
 Test scripts directly:
 
 ```bash
-# Test discovery (recursive search)
-~/.claude/skills/vault-manager/scripts/vault-find.sh "ai-workflows"
-# Expected: /path/to/vault/04 RESSOURCEN/ai-workflows.md
+# Test discovery (CLI, Obsidian muss laufen)
+obsidian.com search query="ai-workflows" format=json
+# Expected: JSON mit Suchergebnissen
 
-# Test reading document
-~/.claude/skills/vault-manager/scripts/vault-read.sh "/path/to/document.md"
-# Expected: ✅ Document loaded + Metadata + Content
+# Test reading document (CLI)
+obsidian.com read file="04 RESSOURCEN/ai-workflows.md"
+# Expected: Document content
 ```
 
 ---
@@ -165,9 +169,9 @@ secret-run vault -- echo $OBSIDIAN_VAULT
 **Cause:** Document doesn't exist or spelling is off
 
 **Solution:**
-1. Test discovery directly:
+1. Test discovery (Obsidian muss laufen):
    ```bash
-   ~/.claude/skills/vault-manager/scripts/vault-find.sh "my-doc"
+   obsidian.com search query="my-doc" format=json
    ```
 
 2. Verify document exists:
@@ -206,8 +210,8 @@ status: "Active"              # Wrong: uppercase in quoted string
 After setup, verify functionality:
 
 - [ ] OBSIDIAN_VAULT set: `echo $OBSIDIAN_VAULT` (shows path)
-- [ ] vault-find.sh works: `vault-find.sh test-doc` (finds or errors gracefully)
-- [ ] vault-read.sh works: `vault-read.sh /path/to/doc.md` (shows metadata + content)
+- [ ] CLI search works: `obsidian.com search query="test-doc" format=json` (finds results)
+- [ ] CLI read works: `obsidian.com read file="path/to/doc.md"` (shows content)
 - [ ] Skill auto-triggers: In Claude Code, use `vault:` prefix and see if skill auto-triggers
 - [ ] Document loads: "Nutze vault:ai-workflows als Kontext" loads the document
 
@@ -216,7 +220,7 @@ After setup, verify functionality:
 ## Next Steps
 
 ### Current Status
-- [x] UC1 Read: vault-find.sh + vault-read.sh
+- [x] UC1 Read: CLI/MCP (search, read, properties)
 - [x] UC2 Export: vault-export.sh + /vault-export
 - [x] UC3 Edit: vault-edit.sh + /vault-work
 - [x] Backup: /obsidian-sync
