@@ -26,7 +26,7 @@
 
 # ===== WHITELIST: Commands =====
 !commands/
-!commands/*.md
+!commands/*
 
 # ===== WHITELIST: Hooks =====
 !hooks/
@@ -39,9 +39,6 @@
 # ===== WHITELIST: Assets =====
 !assets/
 !assets/*
-
-# ===== WHITELIST: Statusline =====
-!statusline.sh
 
 # ===== EXPLICIT DENIES (safety net) =====
 # Credentials and secrets
