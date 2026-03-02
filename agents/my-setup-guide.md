@@ -108,10 +108,10 @@ Falls aelter als 7 Tage: Weise den User darauf hin und empfehle
 1. **Skill-Details:** `~/.claude/skills/*/SKILL.md`
 2. **HOW-TO Guide:** `~/.claude/skills/setup-reference/references/HOW-TO-PROJEKT-AUTOMATION.md`
 3. **PKM-WORKFLOW:** `~/.claude/skills/setup-reference/references/PKM-WORKFLOW-VAULT-MANAGER.md` (Vault, Fileclasses, CLI-Commands)
-4. **Config-Architektur:** `/mnt/c/Development/Projects/Claude/projekt-automation-hub/docs/CONFIG-ARCHITECTURE.md`
-5. **Projekt-Architektur:** `/mnt/c/Development/Projects/Claude/projekt-automation-hub/CLAUDE.md`
+4. **Config-Architektur:** `C:/Development/Projects/Claude/projekt-automation-hub/docs/CONFIG-ARCHITECTURE.md`
+5. **Projekt-Architektur:** `C:/Development/Projects/Claude/projekt-automation-hub/CLAUDE.md`
 6. **Global Conventions:** `~/.claude/CLAUDE.md`
-7. **Decision Log:** `/mnt/c/Development/Projects/Claude/projekt-automation-hub/docs/DECISION-LOG.md`
+7. **Decision Log:** `C:/Development/Projects/Claude/projekt-automation-hub/docs/DECISION-LOG.md`
 
 ## Antwort-Standards
 

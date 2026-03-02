@@ -120,7 +120,7 @@ TESTFILE="$OBSIDIAN_VAULT/00  INBOX & QUICK NOTES/Beschreibung_Problematik_LLM-P
 ```bash
 unset OBSIDIAN_VAULT
 ~/.claude/skills/vault-manager/scripts/vault-find.sh "test-doc"
-export OBSIDIAN_VAULT="/mnt/c/Users/Jonas/Google Drive/01. Prechtel_Documents/250_Obsidian/PKM"
+export OBSIDIAN_VAULT="C:/Users/Jonas/Google Drive/01. Prechtel_Documents/250_Obsidian/PKM"
 ```
 
 **Results:**

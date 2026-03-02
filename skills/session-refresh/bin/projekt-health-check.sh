@@ -38,37 +38,52 @@ log_debug() {
     :
 }
 
+# Trim leading/trailing whitespace - pure bash, zero subprocesses
+# Usage: trim VAR_NAME (modifies variable in-place via nameref)
+trim() {
+    local -n _ref="$1"
+    _ref="${_ref#"${_ref%%[![:space:]]*}"}"
+    _ref="${_ref%"${_ref##*[![:space:]]}"}"
+}
+
 # Normalize status emoji to canonical form
+# Sets REPLY variable instead of echo (avoids subshell)
 normalize_status() {
     local status="$1"
     case "$status" in
-        *completed*|*✅*) echo "completed" ;;
-        *in_progress*|*⏳*) echo "in_progress" ;;
-        *pending*|*📋*) echo "pending" ;;
-        *blocked*|*🚫*) echo "blocked" ;;
-        *ongoing*|*📘*) echo "ongoing" ;;
-        *) echo "unknown" ;;
+        *completed*|*✅*) REPLY="completed" ;;
+        *in_progress*|*⏳*) REPLY="in_progress" ;;
+        *pending*|*📋*) REPLY="pending" ;;
+        *blocked*|*🚫*) REPLY="blocked" ;;
+        *ongoing*|*📘*) REPLY="ongoing" ;;
+        *) REPLY="unknown" ;;
     esac
 }
 
-# Extract status from task file header
+# Extract status from task file header - pure bash, zero subprocesses
+# Sets REPLY variable instead of echo (avoids subshell)
 get_task_file_status() {
     local file="$1"
     if [[ ! -f "$file" ]]; then
-        echo "missing"
+        REPLY="missing"
         return
     fi
-    # Look for **Status:** line in first 20 lines
-    local status_line
-    status_line=$(head -20 "$file" | grep -i '^\*\*Status:\*\*' | head -1 || true)
-    if [[ -z "$status_line" ]]; then
-        # Fallback: look for Status: without bold
-        status_line=$(head -20 "$file" | grep -i '^Status:' | head -1 || true)
-    fi
+    # Read first 20 lines, match **Status:** or Status: pattern
+    local line_count=0
+    local status_line=""
+    while IFS= read -r fline && (( line_count++ < 20 )); do
+        if [[ "$fline" == \*\*Status:\*\** ]]; then
+            status_line="$fline"
+            break
+        elif [[ -z "$status_line" && "${fline,,}" == status:* ]]; then
+            status_line="$fline"
+            break
+        fi
+    done < "$file"
     if [[ -n "$status_line" ]]; then
         normalize_status "$status_line"
     else
-        echo "unknown"
+        REPLY="unknown"
     fi
 }
 
@@ -84,13 +99,15 @@ if [[ ! -f "$PROJEKT_FILE" ]]; then
     die "PROJEKT.md not found: $PROJEKT_FILE"
 fi
 
+# Compute PROJEKT_DIR once (pure bash, no dirname subprocess)
+PROJEKT_DIR="${PROJEKT_FILE%/*}"
+
 # Auto-detect tasks directory if not provided
 if [[ -z "$TASKS_DIR" ]]; then
-    PROJEKT_DIR=$(dirname "$PROJEKT_FILE")
     if [[ -d "$PROJEKT_DIR/tasks" ]]; then
         TASKS_DIR="$PROJEKT_DIR/tasks"
-    elif [[ -d "$(dirname "$PROJEKT_DIR")/docs/tasks" ]]; then
-        TASKS_DIR="$(dirname "$PROJEKT_DIR")/docs/tasks"
+    elif [[ -d "${PROJEKT_DIR%/*}/docs/tasks" ]]; then
+        TASKS_DIR="${PROJEKT_DIR%/*}/docs/tasks"
     else
         TASKS_DIR="$PROJEKT_DIR/tasks"  # Default, will report missing
     fi
@@ -125,11 +142,20 @@ while IFS= read -r line; do
 
         if [[ ${#fields[@]} -ge 8 ]]; then
             # Field indices: 0=empty, 1=UUID, 2=Task, 3=Status, 4=Deps, 5=Effort, 6=Deliverable, 7=File
-            status=$(echo "${fields[3]}" | xargs)
-            deps=$(echo "${fields[4]}" | xargs)
-            task_file=$(echo "${fields[7]:-}" | xargs | sed 's/\[Details\](\(.*\))/\1/' | sed 's/.*](\([^)]*\)).*/\1/')
+            status="${fields[3]}"
+            trim status
+            deps="${fields[4]}"
+            trim deps
+            task_file="${fields[7]:-}"
+            trim task_file
+            # Extract URL from [text](url) markdown link pattern
+            _md_link_re='\[.*\]\(([^)]*)\)'
+            if [[ "$task_file" =~ $_md_link_re ]]; then
+                task_file="${BASH_REMATCH[1]}"
+            fi
 
-            TASK_STATUS["$uuid"]=$(normalize_status "$status")
+            normalize_status "$status"
+            TASK_STATUS["$uuid"]="$REPLY"
             TASK_DEPS["$uuid"]="$deps"
             TASK_FILES["$uuid"]="$task_file"
             ((TOTAL_TASKS++))
@@ -150,18 +176,18 @@ fi
 for uuid in "${!TASK_FILES[@]}"; do
     task_file="${TASK_FILES[$uuid]}"
 
-    # Handle relative paths
+    # Handle relative paths (pure bash — no dirname/basename subprocesses)
     if [[ "$task_file" == tasks/* ]]; then
-        full_path="$(dirname "$PROJEKT_FILE")/$task_file"
+        full_path="$PROJEKT_DIR/$task_file"
     elif [[ "$task_file" == /* ]]; then
         full_path="$task_file"
     else
-        full_path="$TASKS_DIR/$(basename "$task_file")"
+        full_path="$TASKS_DIR/${task_file##*/}"
     fi
 
     # Also try direct path under TASKS_DIR
     if [[ ! -f "$full_path" ]]; then
-        alt_path="$TASKS_DIR/$(basename "$task_file")"
+        alt_path="$TASKS_DIR/${task_file##*/}"
         if [[ -f "$alt_path" ]]; then
             full_path="$alt_path"
         fi
@@ -189,7 +215,8 @@ for uuid in "${!TASK_STATUS[@]}"; do
     # Skip if file is missing (already reported)
     [[ ! -f "$task_file" ]] && continue
 
-    file_status=$(get_task_file_status "$task_file")
+    get_task_file_status "$task_file"
+    file_status="$REPLY"
 
     if [[ "$file_status" != "unknown" && "$projekt_status" != "$file_status" ]]; then
         STATUS_MISMATCHES+=("$uuid: PROJEKT=$projekt_status, File=$file_status")
@@ -216,15 +243,18 @@ for uuid in "${!TASK_DEPS[@]}"; do
     # Parse comma-separated dependencies
     IFS=',' read -ra dep_list <<< "$deps"
     for dep in "${dep_list[@]}"; do
-        dep=$(echo "$dep" | xargs)  # Trim whitespace
+        trim dep
 
         # Extract TASK-XXX pattern
         if [[ "$dep" =~ (TASK-[0-9]+) ]]; then
             dep_uuid="${BASH_REMATCH[1]}"
 
-            # Check if dependency exists
+            # Check if dependency exists (or was archived)
             if [[ -z "${KNOWN_TASKS[$dep_uuid]:-}" ]]; then
-                BROKEN_DEPS+=("$uuid depends on non-existent $dep_uuid")
+                # Archived task - treat as completed for dependency resolution
+                TASK_STATUS["$dep_uuid"]="completed"
+                KNOWN_TASKS["$dep_uuid"]=1
+                log_debug "Archived dep: $dep_uuid (not in PROJEKT.md, assumed completed)"
             fi
         fi
     done
@@ -247,7 +277,7 @@ for uuid in "${!TASK_STATUS[@]}"; do
     if [[ -n "$deps" && "$deps" != "None" && "$deps" != "-" ]]; then
         IFS=',' read -ra dep_list <<< "$deps"
         for dep in "${dep_list[@]}"; do
-            dep=$(echo "$dep" | xargs)
+            trim dep
             if [[ "$dep" =~ (TASK-[0-9]+) ]]; then
                 dep_uuid="${BASH_REMATCH[1]}"
                 dep_status="${TASK_STATUS[$dep_uuid]:-unknown}"
@@ -271,8 +301,10 @@ done
 NEEDS_RESTRUCTURE=false
 RESTRUCTURE_REASONS=()
 
-# Criterion 1: File size > 10K chars
-PROJEKT_SIZE=$(wc -c < "$PROJEKT_FILE")
+# Criterion 1: File size > 10K chars (pure bash, no wc subprocess)
+PROJEKT_CONTENT=$(<"$PROJEKT_FILE")
+PROJEKT_SIZE=${#PROJEKT_CONTENT}
+unset PROJEKT_CONTENT
 if [[ "$PROJEKT_SIZE" -gt 10000 ]]; then
     NEEDS_RESTRUCTURE=true
     RESTRUCTURE_REASONS+=("File size ${PROJEKT_SIZE} chars (>10K)")
@@ -361,7 +393,8 @@ fi
 echo ""
 
 echo "---"
-echo "*Generated: $(date '+%Y-%m-%d %H:%M:%S')*"
+printf -v _now '%(%Y-%m-%d %H:%M:%S)T' -1
+echo "*Generated: $_now*"
 
 # ============================================================================
 # Exit Code

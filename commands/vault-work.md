@@ -26,15 +26,20 @@ Wenn der User `/vault-work` aufruft:
 
 ### 1. Dokument laden
 
-Finde und lade das Dokument via MCP Tools:
+Finde und lade das Dokument via Obsidian CLI (Voraussetzung: Obsidian App muss laufen):
 
 1. Falls `$ARGUMENTS` leer ist, frage den User: "Welches Dokument moechten Sie bearbeiten?"
 
-2. **Discovery:** Nutze das MCP Tool `obsidian_simple_search` mit dem Dokumentnamen als Query:
-   - Suche nach `$ARGUMENTS` (Dokumentname)
+2. **Discovery:** Nutze Obsidian CLI fuer die Suche:
+   ```bash
+   obsidian.com search "$ARGUMENTS"
+   ```
    - Ergebnis: Dateipfad(e) im Vault
 
-3. **Content laden:** Nutze das MCP Tool `obsidian_get_file_contents` mit dem gefundenen Pfad:
+3. **Content laden:** Nutze Obsidian CLI zum Lesen:
+   ```bash
+   obsidian.com read "Dokumentname"
+   ```
    - Liest Inhalt inkl. Frontmatter
    - Zeigt Metadaten + Content an
 
@@ -86,7 +91,7 @@ Zeige dem User:
 
 Wenn das Vault-Dokument bereits in dieser Session geladen wurde (Pfad und Content bekannt):
 
-1. **NICHT** erneut MCP Search oder Read aufrufen
+1. **NICHT** erneut CLI Search oder Read aufrufen
 2. Direkt vault-edit.sh mit `--path` Flag nutzen:
 
 ```bash
@@ -99,7 +104,7 @@ echo "<neuer-content>" | ~/.claude/skills/vault-manager/scripts/vault-edit.sh --
 
 **Wann Warm-Path nutzen:**
 - User hat `vault:dokument` geladen, Aenderungen diskutiert, und will jetzt speichern
-- Pfad wurde schon von MCP Search zurueckgegeben (in dieser Session)
+- Pfad wurde schon von CLI Search zurueckgegeben (in dieser Session)
 - Dokument wurde bereits gelesen und Content ist im Kontext
 
 **Wann Cold-Start nutzen:**
@@ -126,14 +131,14 @@ Dokument nicht gefunden: <name>
 
 Tipps:
 1. Pruefe die Schreibweise
-2. Nutze MCP obsidian_simple_search fuer die Suche
+2. Nutze `obsidian.com search` fuer die Suche
 3. Das Dokument muss im Vault existieren
 ```
 
 ## Technische Details
 
-- **Discovery:** MCP Tool `obsidian_simple_search` (Obsidian muss laufen)
-- **Read:** MCP Tool `obsidian_get_file_contents` (Obsidian muss laufen)
+- **Discovery:** `obsidian.com search` CLI (Obsidian muss laufen)
+- **Read:** `obsidian.com read` CLI (Obsidian muss laufen)
 - **Edit-Script:** `~/.claude/skills/vault-manager/scripts/vault-edit.sh`
 - **Zielordner:** Bestehendes Dokument wird in-place aktualisiert
 - **Backup:** Automatisch als `.bak` vor Ueberschreiben
@@ -148,4 +153,4 @@ Tipps:
 ---
 
 **Erstellt:** 2026-02-10 (TASK-016)
-**Aktualisiert:** 2026-02-23 (TASK-033 — vault-find.sh/vault-read.sh → MCP Tools)
+**Aktualisiert:** 2026-03-02 (TASK-061 — MCP Tools → Obsidian CLI)

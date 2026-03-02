@@ -6,17 +6,13 @@
 
 ## Scripts Reference
 
-### Document Discovery (CLI/MCP — ersetzt vault-find.sh)
+### Document Discovery (CLI — ersetzt vault-find.sh)
 
-**Method:** MCP Tool `obsidian_simple_search` oder CLI `obsidian.com search`
+**Method:** Obsidian CLI `obsidian.com search`
 
 **Usage:**
 ```bash
-# CLI
 obsidian.com search query="document-name" format=json
-
-# MCP Tool (in Claude Code)
-obsidian_simple_search(query="document-name")
 ```
 
 **Voraussetzung:** Obsidian App muss laufen (CLI kommuniziert via Named Pipe)
@@ -26,18 +22,14 @@ obsidian_simple_search(query="document-name")
 
 ---
 
-### Document Read (CLI/MCP — ersetzt vault-read.sh)
+### Document Read (CLI — ersetzt vault-read.sh)
 
-**Method:** MCP Tool `obsidian_get_file_contents` oder CLI `obsidian.com read`
+**Method:** Obsidian CLI `obsidian.com read`
 
 **Usage:**
 ```bash
-# CLI
 obsidian.com read file="path/to/document.md"
 obsidian.com properties file="path/to/document.md" format=yaml
-
-# MCP Tool (in Claude Code)
-obsidian_get_file_contents(filepath="path/to/document.md")
 ```
 
 **Voraussetzung:** Obsidian App muss laufen
@@ -158,7 +150,7 @@ Base files in vault:
 **Performance:**
 - List: < 500ms
 - Explain: < 500ms
-- Execute: 5-30s depending on filter count and vault size (WSL2/NTFS I/O)
+- Execute: 5-30s depending on filter count and vault size (NTFS I/O)
 
 **Implementation Details:**
 - Pure awk/bash YAML parser (no jq/yq dependency)
@@ -251,8 +243,8 @@ title: "My: Special: Title"  # Correct
 
 **Examples:**
 ```bash
-# WSL2 Windows path
-/mnt/c/Users/Jonas/Google Drive/01. Prechtel_Documents/250_Obsidian/PKM
+# Windows (Native)
+C:/Users/Jonas/Google Drive/01. Prechtel_Documents/250_Obsidian/PKM
 
 # macOS
 /Users/user/Documents/Obsidian Vault
@@ -263,12 +255,8 @@ title: "My: Special: Title"  # Correct
 
 **Set via:**
 ```bash
-# Environment
-export OBSIDIAN_VAULT=/path/to/vault
-
-# secret-run
-echo "OBSIDIAN_VAULT=/path/to/vault" > ~/.config/secrets/env.d/vault.env
-secret-run vault -- claude code
+# SessionStart Hook (Recommended — automatisch bei jeder Session)
+echo 'OBSIDIAN_VAULT="C:/Users/Jonas/Google Drive/01. Prechtel_Documents/250_Obsidian/PKM"' > ~/.config/secrets/env.d/vault.env
 
 # Inline (development)
 OBSIDIAN_VAULT=/path/to/vault claude code
@@ -337,14 +325,12 @@ OBSIDIAN_VAULT=/path/to/vault claude code
 
 ### Script Integration
 
-Discovery and read via CLI/MCP (Obsidian muss laufen):
+Discovery and read via Obsidian CLI (Obsidian muss laufen):
 ```bash
-# CLI (Terminal)
 obsidian.com search query="document-name" format=json
 obsidian.com read file="path/to/doc.md"
 
-# MCP Tools (Claude Code, auto-triggered via vault-manager skill)
-# Oder via commands: /vault-work, /vault-export
+# Via commands: /vault-work, /vault-export
 ```
 
 ### Environment Setup
@@ -379,4 +365,4 @@ ls "$OBSIDIAN_VAULT" | head -5
 
 **Reference Version:** 2.0
 **Status:** UC1-3 Complete (Bash-First)
-**Last Updated:** 2026-02-11
+**Last Updated:** 2026-03-02 (TASK-061: MCP→CLI, secret-run→SessionStart, WSL2→Windows)

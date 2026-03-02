@@ -118,6 +118,14 @@ Mache einen kurzen **Final-Check**:
 - Comments only for non-obvious logic
 - Max line length: 100 characters
 
+### Bash Scripts: Windows Git Bash Performance
+- **Keine externen Befehle in Loops** (CreateProcess ~200ms/Call auf Windows vs. ~5ms Linux)
+- `echo | xargs` → `${var#"${var%%[![:space:]]*}"}` (trim)
+- `$(dirname)` → `${path%/*}` | `$(basename)` → `${path##*/}`
+- `$(function)` → REPLY-Convention (Funktion setzt REPLY=, Caller liest REPLY)
+- `wc -c` → `${#var}` | `$(date)` → `printf -v var '%(%F %T)T' -1`
+- Einzelne Aufrufe ausserhalb von Loops sind OK
+
 ### Security & Quality Requirements
 - No security vulnerabilities (SQL injection, XSS, command injection, OWASP Top 10)
 - Validate user input at system boundaries
@@ -176,8 +184,8 @@ Mache einen kurzen **Final-Check**:
 
 **Vault-Referenzen (`vault:`) — Pflicht-Workflow:**
 1. User gibt `vault:"Dokumentname"` als Input → **Main-Session** löst auf:
-   - MCP Tool `obsidian_simple_search` für Discovery
-   - MCP Tool `obsidian_get_file_contents` für Content
+   - CLI: `obsidian.com search "query"` für Discovery
+   - CLI: `obsidian.com read "Dokumentname"` für Content
    - (Voraussetzung: Obsidian App muss laufen)
 2. Aufgelösten **Klartext** an Subagent übergeben (im `prompt:` Parameter)
 3. **NIEMALS** eine `vault:` Referenz unaufgelöst an einen Subagent weiterreichen

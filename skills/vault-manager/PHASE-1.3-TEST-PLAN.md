@@ -121,7 +121,7 @@ unset OBSIDIAN_VAULT
 # Expected: Error message with setup guidance
 
 # Test 6.3: Restore environment
-export OBSIDIAN_VAULT="/mnt/c/Users/Jonas/Google Drive/01. Prechtel_Documents/250_Obsidian/PKM"
+export OBSIDIAN_VAULT="C:/Users/Jonas/Google Drive/01. Prechtel_Documents/250_Obsidian/PKM"
 ```
 
 **Expected Results:**
@@ -177,7 +177,7 @@ export OBSIDIAN_VAULT="/mnt/c/Users/Jonas/Google Drive/01. Prechtel_Documents/25
 
 ### Issue: "OBSIDIAN_VAULT: Unbound variable"
 ```bash
-export OBSIDIAN_VAULT="/mnt/c/Users/Jonas/Google Drive/01. Prechtel_Documents/250_Obsidian/PKM"
+export OBSIDIAN_VAULT="C:/Users/Jonas/Google Drive/01. Prechtel_Documents/250_Obsidian/PKM"
 ```
 
 ### Issue: "vault-find.sh: command not found"

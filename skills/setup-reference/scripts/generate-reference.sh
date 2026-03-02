@@ -190,6 +190,33 @@ extract_description() {
   echo ""
   echo "**Gesamt:** $HOOK_COUNT Hooks"
   echo ""
+
+  # --- 4b. Hook Details (SOPS-Kontext aus session-env-loader.sh) ---
+  HOOKS_DIR="$CLAUDE_DIR/hooks"
+  ENV_LOADER="$HOOKS_DIR/session-env-loader.sh"
+  if [[ -f "$ENV_LOADER" ]]; then
+    echo "### Hook Details: session-env-loader.sh"
+    echo ""
+    USES_SOPS=false
+    USES_AGE=false
+    USES_MINGW=false
+    USES_CACHE=false
+    grep -q 'sops' "$ENV_LOADER" 2>/dev/null && USES_SOPS=true
+    grep -q 'age' "$ENV_LOADER" 2>/dev/null && USES_AGE=true
+    grep -q 'IS_MINGW\|MINGW\|MSYS' "$ENV_LOADER" 2>/dev/null && USES_MINGW=true
+    grep -q 'env-cache\|CACHE_FILE' "$ENV_LOADER" 2>/dev/null && USES_CACHE=true
+    echo "| Feature | Erkannt |"
+    echo "|---------|---------|"
+    echo "| SOPS Decryption | $($USES_SOPS && echo '✅' || echo '❌') |"
+    echo "| age Key-File | $($USES_SOPS && echo '✅' || echo '❌') |"
+    echo "| MINGW/Windows Support | $($USES_MINGW && echo '✅' || echo '❌') |"
+    echo "| .env-cache Fallback (Bug #15840) | $($USES_CACHE && echo '✅' || echo '❌') |"
+    echo ""
+    # Extract ENV_DIR path from script
+    env_dir_line=$(grep -m1 'ENV_DIR=' "$ENV_LOADER" 2>/dev/null | sed 's/.*"\(.*\)".*/\1/' | sed "s|\\\$HOME|~|;s|\\\${XDG_CONFIG_HOME:-\\\$HOME/.config}|~/.config|")
+    [[ -n "$env_dir_line" ]] && echo "**Secrets-Verzeichnis:** \`$env_dir_line\`"
+    echo ""
+  fi
   echo "---"
   echo ""
 
@@ -290,6 +317,59 @@ extract_description() {
     done
   else
     echo "(Kein references/ Verzeichnis gefunden)"
+  fi
+  echo ""
+  echo "---"
+  echo ""
+
+  # --- 9b. Hook Details (dynamisch) ---
+  echo "## 9b. Hook Details"
+  echo ""
+  ENV_LOADER="$HOME/.claude/hooks/session-env-loader.sh"
+  if [[ -f "$ENV_LOADER" ]]; then
+    echo "### session-env-loader.sh"
+    echo ""
+    HAS_SOPS=false
+    HAS_AGE=false
+    HAS_MINGW=false
+    grep -q 'sops' "$ENV_LOADER" 2>/dev/null && HAS_SOPS=true
+    grep -q 'age' "$ENV_LOADER" 2>/dev/null && HAS_AGE=true
+    grep -q 'MINGW\|MSYS' "$ENV_LOADER" 2>/dev/null && HAS_MINGW=true
+    echo "| Feature | Erkannt |"
+    echo "|---------|---------|"
+    echo "| SOPS Decryption | $($HAS_SOPS && echo '✅' || echo '❌') |"
+    echo "| age Key-File | $($HAS_AGE && echo '✅' || echo '❌') |"
+    echo "| MINGW/Windows-Kompatibilitaet | $($HAS_MINGW && echo '✅' || echo '❌') |"
+    # Extract ENV_DIR path
+    ENV_DIR_LINE=$(grep '^ENV_DIR=' "$ENV_LOADER" 2>/dev/null | head -1)
+    if [[ -n "$ENV_DIR_LINE" ]]; then
+      echo ""
+      echo "**Secrets-Verzeichnis:** \`$ENV_DIR_LINE\`"
+    fi
+    # Extract cache file path
+    CACHE_LINE=$(grep '^CACHE_FILE=' "$ENV_LOADER" 2>/dev/null | head -1)
+    if [[ -n "$CACHE_LINE" ]]; then
+      echo "**Cache-Datei:** \`$CACHE_LINE\`"
+    fi
+  else
+    echo "(session-env-loader.sh nicht gefunden)"
+  fi
+  echo ""
+  echo "---"
+  echo ""
+
+  # --- 9c. Erweiterte Dokumentation ---
+  echo "## 9c. Erweiterte Dokumentation"
+  echo ""
+  HOW_TO="$SKILL_DIR/references/HOW-TO-PROJEKT-AUTOMATION.md"
+  if [[ -f "$HOW_TO" ]]; then
+    HOW_TO_SIZE=$(stat --printf='%s' "$HOW_TO" 2>/dev/null || echo '?')
+    HOW_TO_KB=$(( HOW_TO_SIZE / 1024 ))
+    echo "Fuer detaillierte Anleitungen siehe:"
+    echo "- **HOW-TO-PROJEKT-AUTOMATION.md** (${HOW_TO_KB}KB) — Secrets Management, Session-Workflow, Skill-Nutzung"
+    echo "- Pfad: \`~/.claude/skills/setup-reference/references/HOW-TO-PROJEKT-AUTOMATION.md\`"
+  else
+    echo "(HOW-TO-PROJEKT-AUTOMATION.md nicht gefunden)"
   fi
   echo ""
   echo "---"

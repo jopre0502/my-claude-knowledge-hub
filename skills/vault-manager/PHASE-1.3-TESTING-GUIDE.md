@@ -125,7 +125,7 @@ All tests must pass the following criteria:
 
 **Problem:** "OBSIDIAN_VAULT not found"
 ```bash
-export OBSIDIAN_VAULT="/mnt/c/Users/Jonas/Google Drive/01. Prechtel_Documents/250_Obsidian/PKM"
+export OBSIDIAN_VAULT="C:/Users/Jonas/Google Drive/01. Prechtel_Documents/250_Obsidian/PKM"
 ```
 
 **Problem:** "vault-find.sh not found"

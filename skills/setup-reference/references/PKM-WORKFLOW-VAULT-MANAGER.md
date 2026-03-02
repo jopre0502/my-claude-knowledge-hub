@@ -341,7 +341,7 @@ jahr_gelesen: 2026
 
 **Workflow:**
 ```bash
-# 1. Dokument laden (via MCP obsidian_simple_search + obsidian_get_file_contents)
+# 1. Dokument laden (via CLI obsidian.com search + obsidian.com read)
 /vault-work "projektname"
 # → Findet Dokument, lädt Content in Session
 

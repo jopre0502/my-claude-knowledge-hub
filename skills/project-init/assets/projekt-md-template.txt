@@ -57,6 +57,9 @@ Letzte Aktualisierung: {{DATE}}
 
 | UUID | Task | Status | Dependencies | Effort | Deliverable | Task-File |
 |------|------|--------|--------------|--------|-------------|-----------|
+<!-- TASK-000-SLOT: If user accepted onboarding tutorial in Phase 1b, insert row here:
+| **TASK-000** | Onboarding Tutorial | 📋 pending | None | 2h | Setup + Session-Continuity | [Details](tasks/TASK-000-onboarding.md) |
+-->
 | **TASK-001** | Project Setup | 📋 pending | None | 1h | docs | [Details](tasks/TASK-001-setup.md) |
 | **TASK-002** | {{FIRST_FEATURE}} | 📋 pending | TASK-001 | {{EST1}} | {{DEL1}} | [Details](tasks/TASK-002-feature.md) |
 | **TASK-003** | {{SECOND_FEATURE}} | 📋 pending | TASK-002 | {{EST2}} | {{DEL2}} | [Details](tasks/TASK-003-feature.md) |

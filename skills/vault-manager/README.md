@@ -89,22 +89,22 @@ vault:document-name
 
 ---
 
-## 🔧 Discovery & Read (CLI/MCP)
+## 🔧 Discovery & Read (CLI)
 
 ### Document Discovery
-**Method:** MCP Tool `obsidian_simple_search` oder CLI `obsidian.com search`
+**Method:** CLI `obsidian.com search`
 
 - Nutzt Obsidian's internen Index (schnell, case-insensitive)
 - Voraussetzung: Obsidian App muss laufen
 - Fallback: Glob Tool mit Pattern `**/*name*.md` auf `$OBSIDIAN_VAULT`
 
 ### Document Read
-**Method:** MCP Tool `obsidian_get_file_contents` oder CLI `obsidian.com read`
+**Method:** CLI `obsidian.com read`
 
 - Liest Dateiinhalt inkl. Frontmatter
 - Metadata-Extraktion via `obsidian.com properties file="<path>" format=yaml`
 
-> **Hinweis:** vault-find.sh und vault-read.sh wurden bei TASK-027 (CLI Migration, 2026-02-19) durch CLI/MCP ersetzt und geloescht.
+> **Hinweis:** vault-find.sh und vault-read.sh wurden bei TASK-027 (CLI Migration, 2026-02-19) durch CLI ersetzt und geloescht.
 
 ---
 
@@ -153,10 +153,10 @@ All testing focuses on validating these functions:
 
 ## Current Status
 
-- **UC1 Read:** ✅ Complete (CLI/MCP: search, read, properties)
+- **UC1 Read:** ✅ Complete (CLI: search, read, properties)
 - **UC2 Export:** ✅ Complete (vault-export.sh, 7 Fileclass-Typen)
 - **UC3 Edit:** ✅ Complete (vault-edit.sh, /vault-work Command)
-- **Phase 6+:** MCP/RAG Evaluation (Semantic Search, Backlinks)
+- **Phase 6+:** RAG Evaluation (Semantic Search, Backlinks)
 
 ---
 
@@ -180,13 +180,13 @@ All testing focuses on validating these functions:
 ### vault: Prefix Auto-Triggering
 - User types: `vault:document-name`
 - Skill detects: `vault:` prefix pattern via semantic matching
-- Skill executes: MCP search + read (oder CLI obsidian.com)
+- Skill executes: CLI `obsidian.com search` + `obsidian.com read`
 - Result: Document loaded as context
 
 **Note:** `@` notation wird NICHT verwendet (Kollision mit Claude Code's nativer `@file` Auto-Completion).
 
-### CLI/MCP Discovery
-- Discovery via MCP `obsidian_simple_search` oder CLI `obsidian.com search`
+### CLI Discovery
+- Discovery via CLI `obsidian.com search`
 - Nutzt Obsidian's internen Index (schnell, case-insensitive)
 - Fallback: Glob Tool bei nicht-laufendem Obsidian
 
@@ -214,12 +214,12 @@ export OBSIDIAN_VAULT="/path/to/your/vault"
 
 **Where to set it:**
 - Development: Inline before running Claude Code
-- Production: Via `~/.config/secrets/env.d/vault.env` + secret-run
+- Production: Via `~/.config/secrets/env.d/vault.env` + SessionStart Hook
 
 See `references/SETUP.md` for detailed setup.
 
 ### Document Discovery
-Discovery via MCP `obsidian_simple_search` oder CLI `obsidian.com search`. Kein Index-File noetig.
+Discovery via CLI `obsidian.com search`. Kein Index-File noetig.
 
 ```bash
 # CLI Usage (wenn Obsidian laeuft):
@@ -271,7 +271,7 @@ obsidian.com search query="document-name" format=json
 **Skill Version:** 2.0 (UC1-3 Complete)
 **Created:** 2026-01-17
 **Updated:** 2026-02-11
-**Strategy:** Bash-First (MCP/RAG Phase 6+ evaluieren)
+**Strategy:** CLI-First (Obsidian CLI + Bash Scripts)
 
 ---
 

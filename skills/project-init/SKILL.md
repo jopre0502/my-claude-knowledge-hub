@@ -24,7 +24,8 @@ Creates a production-grade project setup in 15-20 minutes:
    - **Auto-injects:** "Session-Continuous Workflow" section explaining `/session-refresh`, `/run-next-tasks`, task tracking
 3. **PROJEKT.md** - Active phase with UUID-based tasks (TASK-001, etc.)
 4. **First Task** - TASK-001 (Project Setup) ready to execute
-5. **Integration** - Hooks into global `/session-refresh` + `/run-next-tasks` skills
+5. **Onboarding Tutorial (optional)** - Asks user if TASK-000 tutorial should be included (10-step guided setup)
+6. **Integration** - Hooks into global `/session-refresh` + `/run-next-tasks` skills
 
 **Task Template (SSOT):** `~/.claude/skills/project-init/assets/task-md-template.txt` - NOT copied to projects
 
@@ -243,6 +244,36 @@ The skill:
 **Note:** Task template is NOT copied to projects. Use SSOT: `assets/task-md-template.txt`
 
 **Output:** Directory structure complete, all files in place
+
+### Phase 1b: Onboarding Tutorial (TASK-000) — Optional
+
+After creating the base structure, check if the onboarding tutorial assets exist:
+
+```
+~/.claude/skills/project-init/assets/onboarding/TASK-000-onboarding.md
+```
+
+**If the file exists**, ask the user via AskUserQuestion:
+
+> "Moechten Sie das Onboarding-Tutorial (TASK-000) in Ihr Projekt aufnehmen? Das Tutorial fuehrt durch 10 Schritte: von der Installation bis zur ersten eigenstaendigen Session."
+>
+> Options: "Ja, Tutorial einbinden" / "Nein, ueberspringen"
+
+**If user says YES:**
+1. Read `assets/onboarding/TASK-000-onboarding.md` and write it to `{docs_path}/tasks/TASK-000-onboarding.md`
+2. Create directory `{docs_path}/tasks/TASK-000/artifacts/`
+3. Read `assets/onboarding/artifacts/cheatsheet.md` and write it to `{docs_path}/tasks/TASK-000/artifacts/cheatsheet.md`
+4. Read `assets/onboarding/artifacts/first-steps-guide.md` and write it to `{docs_path}/tasks/TASK-000/artifacts/first-steps-guide.md`
+5. Add TASK-000 row to PROJEKT.md task table (BEFORE TASK-001):
+   ```
+   | **TASK-000** | Onboarding Tutorial | 📋 pending | None | 2h | Setup + Session-Continuity | [Details](tasks/TASK-000-onboarding.md) |
+   ```
+
+**If user says NO:**
+- Do nothing. No TASK-000 files, no row in PROJEKT.md.
+
+**If the onboarding assets do NOT exist** (e.g., user has older Knowledge Hub version):
+- Skip silently. Do not ask the user.
 
 ### Phase 2: Load Global Workflow
 
@@ -531,6 +562,9 @@ Session 2+ (after TASK-001 complete):
    - `session-handoff-template.txt` - Handoff template
    - `phase-template.txt` - Archived phase template (for completed phases)
    - `workflow-block.txt` - Session-Continuous workflow section (auto-injected)
+   - `onboarding/TASK-000-onboarding.md` - Onboarding tutorial (optional, copied on user consent)
+   - `onboarding/artifacts/cheatsheet.md` - Quick reference card
+   - `onboarding/artifacts/first-steps-guide.md` - Companion guide with costs, troubleshooting
 
 2. **Scripts** (scripts/)
    - `init-project.sh` - Main setup orchestration

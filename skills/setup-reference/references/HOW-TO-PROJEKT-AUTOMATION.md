@@ -616,15 +616,14 @@ Seit TASK-047 (2026-02-23) sind alle Secrets at rest mit **SOPS + age** verschlu
 | Secret editieren | `SOPS_AGE_KEY_FILE=~/.config/secrets/age-key.txt sops edit ~/.config/secrets/env.d/vault.env` |
 | Klartext anzeigen | `SOPS_AGE_KEY_FILE=~/.config/secrets/age-key.txt sops -d ~/.config/secrets/env.d/vault.env` |
 | Neues Profil verschluesseln | `cd ~/.config/secrets && sops --encrypt --in-place --config .sops.yaml env.d/neues.env` |
-| Verifizieren (Terminal) | `secret-run vault -- env \| grep OBSIDIAN` |
+| Verifizieren (Terminal) | `source ~/.config/secrets/.env-cache && env \| grep OBSIDIAN` |
 
 **Wie SOPS in die Toolchain integriert ist:**
 
 | Tool | SOPS-Integration |
 |------|-----------------|
-| `session-env-loader.sh` | `sops -d` mit `SOPS_AGE_KEY_FILE` hardcoded, Fallback auf Klartext |
-| `secret-run` | `load_env()` versucht zuerst `sops -d`, dann Klartext-Parse |
-| MCP-Server | Nutzen `${VAR}` Substitution aus Session-Environment (kein eigenes Decrypt) |
+| `session-env-loader.sh` | `sops -d` mit `SOPS_AGE_KEY_FILE` hardcoded, Fallback auf Klartext. Schreibt `.env-cache` |
+| SessionStart Hook | Laedt `session-env-loader.sh`, setzt Environment fuer Claude Session |
 
 **Neues Secret-Profil hinzufuegen:**
 1. Klartext `.env` erstellen (`KEY=VALUE` Format, kein `export`)

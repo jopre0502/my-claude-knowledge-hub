@@ -17,19 +17,16 @@ Already installed (you're using it)
 Set via SessionStart Hook (automatic) or manually:
 ```bash
 # In ~/.config/secrets/env.d/vault.env:
-OBSIDIAN_VAULT="/mnt/c/Users/Jonas/Google Drive/01. Prechtel_Documents/250_Obsidian/PKM"
+OBSIDIAN_VAULT="C:/Users/Jonas/Google Drive/01. Prechtel_Documents/250_Obsidian/PKM"
 ```
 
 ### 3. ✅ Document Discovery (Automatic)
 
-Discovery erfolgt via **CLI/MCP** (Obsidian muss laufen). Keine Index-Datei notwendig.
+Discovery erfolgt via **Obsidian CLI** (Obsidian muss laufen). Keine Index-Datei notwendig.
 
 ```bash
 # CLI: Obsidian Search (nutzt internen Index)
 obsidian.com search query="document-name" format=json
-
-# MCP Tool (in Claude Code, automatisch via vault-manager Skill)
-obsidian_simple_search(query="document-name")
 ```
 
 **Performance:** Schnell (nutzt Obsidian's internen Index, kein Filesystem-Scan).
@@ -63,21 +60,14 @@ ls -la ~/.claude/skills/vault-manager/scripts/
 
 ### Step 2: Set OBSIDIAN_VAULT Environment Variable
 
-**Option A: Via secret-run (Recommended for Production)**
+**Option A: Via SessionStart Hook (Recommended)**
 
 Edit or create: `~/.config/secrets/env.d/vault.env`
 ```bash
-OBSIDIAN_VAULT=/mnt/c/Users/Jonas/Google\ Drive/01.\ Prechtel_Documents/250_Obsidian/PKM
+OBSIDIAN_VAULT="C:/Users/Jonas/Google Drive/01. Prechtel_Documents/250_Obsidian/PKM"
 ```
 
-Usage:
-```bash
-# Start Claude Code with Vault environment
-secret-run vault -- claude code
-
-# Or run specific commands
-secret-run vault -- /vault-backup
-```
+Der SessionStart Hook (`session-env-loader.sh`) laedt diese Variable automatisch bei jeder neuen Claude Code Session.
 
 **Option B: Inline (Development)**
 
@@ -160,8 +150,8 @@ echo $OBSIDIAN_VAULT
 export OBSIDIAN_VAULT=/path/to/vault
 echo $OBSIDIAN_VAULT  # Should show path now
 
-# Or use secret-run:
-secret-run vault -- echo $OBSIDIAN_VAULT
+# Or source env cache:
+source ~/.config/secrets/.env-cache && echo $OBSIDIAN_VAULT
 ```
 
 ### Issue 2: "Document not found"
@@ -220,11 +210,10 @@ After setup, verify functionality:
 ## Next Steps
 
 ### Current Status
-- [x] UC1 Read: CLI/MCP (search, read, properties)
+- [x] UC1 Read: Obsidian CLI (search, read, properties)
 - [x] UC2 Export: vault-export.sh + /vault-export
 - [x] UC3 Edit: vault-edit.sh + /vault-work
 - [x] Backup: /obsidian-sync
-- [ ] Phase 6+: MCP/RAG Evaluation (optional)
 
 ---
 
@@ -243,4 +232,4 @@ After setup, verify functionality:
 ---
 
 **Installation Status:** ✅ Complete
-**Last Updated:** 2026-02-11
+**Last Updated:** 2026-03-02 (TASK-061: MCP→CLI, secret-run→SessionStart Hook, WSL2→Windows Pfade)
