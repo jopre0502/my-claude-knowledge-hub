@@ -68,8 +68,7 @@ Letzte Aktualisierung: {{DATE}}
 
 ## 📈 Phase 2: {{PHASE_2_NAME}} (GEPLANT)
 
-<details>
-<summary>Phase 2 Details - Klick zum Ausklappen</summary>
+> Geplant — Details werden bei Phase-Start ergaenzt. Bei Abschluss nach `{{DOCS_PATH}}/phases/` auslagern.
 
 **Ziel:** {{PHASE_2_GOAL}}
 
@@ -78,16 +77,9 @@ Letzte Aktualisierung: {{DATE}}
 - [ ] {{PHASE_2_TASK_2}}
 - [ ] {{PHASE_2_TASK_3}}
 
-**Abhängigkeiten:**
-- Requires completion of Phase 1
-
-**Tasks:**
-
 | UUID | Task | Status | Dependencies | Effort | Deliverable | Task-File |
 |------|------|--------|--------------|--------|-------------|-----------|
 | **TASK-004** | {{TASK_4_DESC}} | 📋 pending | TASK-003 | {{EST4}} | {{DEL4}} | [Details](tasks/TASK-004-{{TASK_4}}.md) |
-
-</details>
 
 ---
 
@@ -137,35 +129,21 @@ Letzte Aktualisierung: {{DATE}}
 
 ## 📚 Reference Information
 
-<details>
-<summary>Entscheidungslog</summary>
+### Entscheidungslog
 
-**Track architectural and process decisions - NOT task status or events.**
+> Bei >10 Eintraegen nach `{{DOCS_PATH}}/DECISION-LOG.md` auslagern.
 
-**Was gehört rein:**
-- Architectural Decisions (Systemdesign, Patterns, Struktur)
-- Process Decisions (Workflow-Prinzipien, Standards)
-- Constraints & Targets (Größenlimits, Metriken)
-
-| Datum | Entscheidung | Begründung | Phase |
-|-------|--------------|-----------|-------|
+| Datum | Entscheidung | Begruendung | Phase |
+|-------|--------------|-------------|-------|
 | _Noch keine Entscheidungen geloggt_ | | | |
 
-</details>
-
-<details>
-<summary>Offene Fragen</summary>
+### Offene Fragen
 
 | # | Frage | Status | Verantwortlich |
 |---|-------|--------|----------------|
 | _No open questions yet_ | | | |
 
-**Verwendung:**
-- Offene Fragen dokumentieren, die die Implementation beeinflussen
-- Status updaten: 🔴 Blocked, 🟡 In Progress, ✅ Resolved
-- Verantwortlichen zuweisen für Follow-up
-
-</details>
+> Status-Werte: 🔴 Blocked, 🟡 In Progress, ✅ Resolved
 
 ---
 

@@ -144,8 +144,7 @@ Letzte Aktualisierung: {today}
 
 ## Historical / Resolved
 
-<details>
-<summary>Historische Entscheidungen ({len(resolved)} Eintraege)</summary>
+> {len(resolved)} historische Entscheidungen
 
 | Decision | Rationale | Impact | Status | Datum |
 |----------|-----------|--------|--------|-------|
@@ -155,8 +154,6 @@ Letzte Aktualisierung: {today}
         content += f"| {e['decision']} | {e['rationale']} | {e['impact']} | {e['status']} | {e['date']} |\n"
 
     content += """
-</details>
-
 ---
 
 """

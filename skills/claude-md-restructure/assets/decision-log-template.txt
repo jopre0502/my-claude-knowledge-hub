@@ -18,14 +18,11 @@ Letzte Aktualisierung: {{DATE}}
 
 ## Resolved / Historical
 
-<details>
-<summary>Historische Entscheidungen ({{RESOLVED_COUNT}} Eintraege)</summary>
+> {{RESOLVED_COUNT}} historische Entscheidungen
 
 | Decision | Rationale | Impact | Status | Datum |
 |----------|-----------|--------|--------|-------|
 {{RESOLVED_DECISIONS}}
-
-</details>
 
 ---
 

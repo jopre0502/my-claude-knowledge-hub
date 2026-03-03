@@ -221,7 +221,7 @@ def generate_recommendations(result: AnalysisResult) -> List[str]:
     if result.open_questions_resolved > 3:
         recommendations.append(
             f"📦 {result.open_questions_resolved} resolved Open Questions. "
-            f"Empfehlung: In <details> wrappen oder nach Decision Log verschieben."
+            f"Empfehlung: In separate Datei auslagern oder nach Decision Log verschieben."
         )
 
     # Large sections

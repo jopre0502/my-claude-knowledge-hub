@@ -98,10 +98,7 @@ LIVE-SESSION (mit Trainer, ~90 Min)
 
 ## Trainer-Notizen
 
-<details>
-<summary>Nur fuer den Trainer (klicken zum Aufklappen)</summary>
-
-### Vorbereitung
+### Vorbereitung (Trainer)
 
 - [ ] Knowledge Hub Repo ist public (oder Invites verschickt)
 - [ ] TASK-000 + Cheatsheet an Teilnehmer gesendet (mind. 3 Tage vorher)
@@ -136,8 +133,6 @@ Wenn Teilnehmer `/project-init` ausfuehren, pruefen ob TASK-000 in PROJEKT.md er
 ```
 
 Falls der User das Tutorial ueberspringt → Status auf `completed` setzen.
-
-</details>
 
 ---
 

@@ -1,34 +1,51 @@
 #!/usr/bin/env python3
 """
-Apply Progressive Disclosure to CLAUDE.md sections.
+Identify Modular Disclosure candidates in CLAUDE.md.
 
-Wraps resolved/historical content in <details> tags to reduce visible size.
+Analyzes sections for outsourcing potential — resolved content, large tables,
+and reference sections that should be moved to separate files.
+
+NOTE: This script does NOT modify the file. It generates actionable
+recommendations for manual or assisted outsourcing.
 
 Usage:
-    python3 apply_progressive_disclosure.py <claude-md-path> [--dry-run]
+    python3 apply_progressive_disclosure.py <claude-md-path>
 
 Targets:
-- Open Questions (resolved entries)
-- Known Issues (resolved entries)
-- Bekannte Herausforderungen (gelöst entries)
-- Historical/completed sections
+- Open Questions (resolved entries) -> move to Decision Log or archive
+- Solved Challenges -> move to docs/ or remove
+- Large tables (>8 rows) -> consider outsourcing to separate file
+- Reference sections -> consider outsourcing to docs/
 
 Exit codes:
-    0 = Success (changes made or none needed)
+    0 = No outsourcing needed
     1 = Error
+    2 = Outsourcing candidates found (actionable)
 """
 
 import sys
 import re
 from pathlib import Path
 from typing import List, Tuple
+from dataclasses import dataclass
 
 
-def find_and_wrap_resolved_questions(content: str) -> Tuple[str, int]:
-    """Find Open Questions section and wrap resolved items in <details>."""
-    changes = 0
+@dataclass
+class OutsourcingCandidate:
+    """A section that could be outsourced to a separate file."""
+    section_name: str
+    line_start: int
+    line_end: int
+    size_bytes: int
+    item_count: int
+    category: str  # "resolved_questions", "solved_challenges", "large_table", "reference_section"
+    recommendation: str
 
-    # Pattern for Open Questions section
+
+def find_resolved_questions(content: str) -> List[OutsourcingCandidate]:
+    """Find Open Questions section with resolved items."""
+    candidates = []
+
     oq_pattern = re.compile(
         r'(##\s*Open Questions.*?\n)(.*?)(?=\n##\s+[^#]|\n---\s*$|\Z)',
         re.DOTALL | re.IGNORECASE
@@ -36,16 +53,12 @@ def find_and_wrap_resolved_questions(content: str) -> Tuple[str, int]:
 
     match = oq_pattern.search(content)
     if not match:
-        return content, 0
+        return candidates
 
-    header = match.group(1)
     section_content = match.group(2)
+    line_start = content[:match.start()].count('\n') + 1
 
-    # Check for existing <details>
-    if '<details>' in section_content:
-        return content, 0
-
-    # Find resolved vs active
+    # Find resolved items
     resolved_pattern = re.compile(
         r'^(\s*[-*]\s*)~~(.+?)~~\s*$|^(\s*[-*]\s*)\[x\](.+?)$',
         re.MULTILINE | re.IGNORECASE
@@ -53,136 +66,108 @@ def find_and_wrap_resolved_questions(content: str) -> Tuple[str, int]:
 
     resolved_matches = list(resolved_pattern.finditer(section_content))
 
-    if len(resolved_matches) < 2:
-        return content, 0
+    if len(resolved_matches) >= 2:
+        line_end = line_start + section_content.count('\n')
+        size = sum(len(m.group(0).encode('utf-8')) for m in resolved_matches)
 
-    # Split into active (top) and resolved (bottom, wrapped)
-    lines = section_content.split('\n')
-    active_lines = []
-    resolved_lines = []
+        candidates.append(OutsourcingCandidate(
+            section_name="Open Questions (resolved)",
+            line_start=line_start,
+            line_end=line_end,
+            size_bytes=size,
+            item_count=len(resolved_matches),
+            category="resolved_questions",
+            recommendation=(
+                f"{len(resolved_matches)} resolved Questions gefunden. "
+                f"Empfehlung: Nach docs/DECISION-LOG.md verschieben oder entfernen."
+            )
+        ))
 
-    for line in lines:
-        is_resolved = (
-            '~~' in line and line.count('~~') >= 2 or
-            re.search(r'\[x\]', line, re.IGNORECASE) or
-            ('Resolved' in line or 'resolved' in line or '✅' in line)
-        )
-
-        if is_resolved:
-            resolved_lines.append(line)
-        else:
-            active_lines.append(line)
-
-    if len(resolved_lines) < 2:
-        return content, 0
-
-    # Build new section
-    new_section = header
-    new_section += '\n'.join(active_lines).strip()
-    new_section += f"""
-
-<details>
-<summary>Resolved ({len(resolved_lines)} items)</summary>
-
-{chr(10).join(resolved_lines)}
-
-</details>
-"""
-
-    changes = len(resolved_lines)
-
-    # Replace in content
-    new_content = content[:match.start()] + new_section + content[match.end():]
-    return new_content, changes
+    return candidates
 
 
-def find_and_wrap_challenges(content: str) -> Tuple[str, int]:
-    """Wrap solved challenges in <details>."""
-    changes = 0
+def find_solved_challenges(content: str) -> List[OutsourcingCandidate]:
+    """Find solved challenge sections."""
+    candidates = []
 
-    # Pattern for Challenge sections that are solved
     challenge_pattern = re.compile(
         r'(###\s*Challenge\s*\d+:.*?)\n(.*?)(?=\n###\s+|\n##\s+|\Z)',
         re.DOTALL
     )
 
-    matches = list(challenge_pattern.finditer(content))
-
-    for match in reversed(matches):  # Reverse to preserve positions
+    for match in challenge_pattern.finditer(content):
         header = match.group(1)
         body = match.group(2)
 
-        # Check if solved
-        if 'gelöst' in header.lower() or 'solved' in header.lower() or 'Problem gelöst' in body:
-            # Already wrapped?
-            if '<details>' in body:
-                continue
+        if 'geloest' in header.lower() or 'solved' in header.lower() or 'Problem geloest' in body:
+            line_start = content[:match.start()].count('\n') + 1
+            line_end = line_start + (header + body).count('\n')
+            size = len((header + body).encode('utf-8'))
 
-            # Wrap
-            new_section = f"""{header}
+            candidates.append(OutsourcingCandidate(
+                section_name=header.strip()[:60],
+                line_start=line_start,
+                line_end=line_end,
+                size_bytes=size,
+                item_count=1,
+                category="solved_challenges",
+                recommendation=(
+                    f"Geloeste Challenge ({size:,} Bytes). "
+                    f"Empfehlung: Entfernen oder nach docs/ auslagern."
+                )
+            ))
 
-<details>
-<summary>Details (gelöst)</summary>
-
-{body.strip()}
-
-</details>
-"""
-            content = content[:match.start()] + new_section + content[match.end():]
-            changes += 1
-
-    return content, changes
+    return candidates
 
 
-def wrap_large_tables(content: str, max_rows: int = 8) -> Tuple[str, int]:
-    """Wrap tables with many rows in <details>."""
-    changes = 0
+def find_large_tables(content: str, max_rows: int = 8) -> List[OutsourcingCandidate]:
+    """Find tables with many rows that could be outsourced."""
+    candidates = []
 
-    # Find tables (header + separator + rows)
     table_pattern = re.compile(
         r'(\|[^\n]+\|\n\|[-:\s|]+\|\n)((?:\|[^\n]+\|\n){' + str(max_rows) + r',})',
         re.MULTILINE
     )
 
-    matches = list(table_pattern.finditer(content))
-
-    for match in reversed(matches):
+    for match in table_pattern.finditer(content):
         table_header = match.group(1)
         table_rows = match.group(2)
-        row_count = table_rows.count('\n')
+        row_count = table_rows.strip().count('\n') + 1
 
-        # Check if already in details
-        prev_content = content[max(0, match.start()-50):match.start()]
-        if '<details>' in prev_content:
-            continue
-
-        # Don't wrap if it's the main task table
+        # Skip main task table
         if 'UUID' in table_header and 'Dependencies' in table_header:
             continue
 
-        wrapped = f"""<details>
-<summary>Tabelle ({row_count} Zeilen)</summary>
+        line_start = content[:match.start()].count('\n') + 1
+        line_end = line_start + (table_header + table_rows).count('\n')
+        size = len((table_header + table_rows).encode('utf-8'))
 
-{table_header}{table_rows}
-</details>
-"""
-        content = content[:match.start()] + wrapped + content[match.end():]
-        changes += 1
+        candidates.append(OutsourcingCandidate(
+            section_name=f"Tabelle ({row_count} Zeilen)",
+            line_start=line_start,
+            line_end=line_end,
+            size_bytes=size,
+            item_count=row_count,
+            category="large_table",
+            recommendation=(
+                f"Grosse Tabelle mit {row_count} Zeilen ({size:,} Bytes). "
+                f"Empfehlung: In separate Datei auslagern und per Link referenzieren."
+            )
+        ))
 
-    return content, changes
+    return candidates
 
 
-def wrap_reference_sections(content: str) -> Tuple[str, int]:
-    """Wrap reference sections that are not frequently needed."""
-    changes = 0
+def find_reference_sections(content: str) -> List[OutsourcingCandidate]:
+    """Find reference sections that are rarely needed inline."""
+    candidates = []
 
-    # Sections to potentially wrap
-    wrap_candidates = [
+    ref_candidates = [
         (r'##\s*Referenzen\s*(?:&|und)?\s*Externe\s*Ressourcen', 'Referenzen'),
-        (r'##\s*Häufige\s*Development\s*Tasks', 'Development Tasks'),
+        (r'##\s*Haeufige\s*Development\s*Tasks', 'Development Tasks'),
     ]
 
-    for pattern, name in wrap_candidates:
+    for pattern, name in ref_candidates:
         section_match = re.search(
             f'({pattern}.*?\\n)(.*?)(?=\\n##\\s+[^#]|\\n---\\s*$|\\Z)',
             content,
@@ -192,106 +177,89 @@ def wrap_reference_sections(content: str) -> Tuple[str, int]:
         if not section_match:
             continue
 
-        header = section_match.group(1)
         body = section_match.group(2)
+        size = len(body.encode('utf-8'))
 
-        # Already wrapped?
-        if '<details>' in body[:50]:
+        if size < 500:
             continue
 
-        # Wrap the body
-        new_section = f"""{header}
-<details>
-<summary>{name} (klicken zum Aufklappen)</summary>
+        line_start = content[:section_match.start()].count('\n') + 1
+        line_end = line_start + (section_match.group(0)).count('\n')
 
-{body.strip()}
+        candidates.append(OutsourcingCandidate(
+            section_name=name,
+            line_start=line_start,
+            line_end=line_end,
+            size_bytes=size,
+            item_count=1,
+            category="reference_section",
+            recommendation=(
+                f"Referenz-Sektion '{name}' ({size:,} Bytes). "
+                f"Empfehlung: In separate Datei docs/{name.lower().replace(' ', '-')}.md auslagern."
+            )
+        ))
 
-</details>
-"""
-        content = content[:section_match.start()] + new_section + content[section_match.end():]
-        changes += 1
-
-    return content, changes
+    return candidates
 
 
-def apply_progressive_disclosure(file_path: str, dry_run: bool = False) -> bool:
-    """Main function to apply all progressive disclosure patterns."""
+def analyze_modular_disclosure(file_path: str) -> List[OutsourcingCandidate]:
+    """Main analysis function — find all outsourcing candidates."""
     path = Path(file_path)
 
     if not path.exists():
         print(f"Error: File not found: {file_path}")
-        return False
+        return []
 
     content = path.read_text(encoding='utf-8')
-    original_size = len(content.encode('utf-8'))
-    total_changes = 0
 
-    print(f"Analyzing: {file_path}")
-    print(f"Original size: {original_size:,} bytes")
-    print("-" * 40)
+    candidates = []
+    candidates.extend(find_resolved_questions(content))
+    candidates.extend(find_solved_challenges(content))
+    candidates.extend(find_large_tables(content))
+    candidates.extend(find_reference_sections(content))
 
-    # Apply transformations
-    content, changes = find_and_wrap_resolved_questions(content)
-    if changes:
-        print(f"✓ Wrapped {changes} resolved Open Questions")
-        total_changes += changes
+    return candidates
 
-    content, changes = find_and_wrap_challenges(content)
-    if changes:
-        print(f"✓ Wrapped {changes} solved Challenges")
-        total_changes += changes
 
-    content, changes = wrap_large_tables(content)
-    if changes:
-        print(f"✓ Wrapped {changes} large tables")
-        total_changes += changes
+def print_report(file_path: str, candidates: List[OutsourcingCandidate]) -> None:
+    """Print formatted analysis report."""
+    print(f"Modular Disclosure Analyse: {file_path}")
+    print("=" * 60)
 
-    content, changes = wrap_reference_sections(content)
-    if changes:
-        print(f"✓ Wrapped {changes} reference sections")
-        total_changes += changes
+    if not candidates:
+        print("Keine Auslagerungs-Kandidaten gefunden.")
+        print("Dokument ist bereits gut strukturiert.")
+        return
 
-    # Report
-    new_size = len(content.encode('utf-8'))
-    print("-" * 40)
+    total_bytes = sum(c.size_bytes for c in candidates)
+    print(f"Gefunden: {len(candidates)} Kandidaten ({total_bytes:,} Bytes Einsparpotential)")
+    print("-" * 60)
 
-    if total_changes == 0:
-        print("No changes needed - document already optimized.")
-        return True
+    for i, c in enumerate(candidates, 1):
+        print(f"\n{i}. [{c.category}] {c.section_name}")
+        print(f"   Zeilen {c.line_start}-{c.line_end} | {c.size_bytes:,} Bytes | {c.item_count} Items")
+        print(f"   -> {c.recommendation}")
 
-    print(f"Total changes: {total_changes}")
-    print(f"Size change: {original_size:,} -> {new_size:,} bytes ({new_size - original_size:+,})")
-    print("(Note: <details> adds some bytes, but reduces visible content)")
-
-    if dry_run:
-        print("\nDRY RUN - No changes written")
-        return True
-
-    # Create backup
-    backup_path = path.with_suffix('.pre-disclosure.backup')
-    backup_path.write_text(path.read_text(encoding='utf-8'), encoding='utf-8')
-    print(f"Created backup: {backup_path}")
-
-    # Write changes
-    path.write_text(content, encoding='utf-8')
-    print(f"Updated: {path}")
-
-    return True
+    print("\n" + "=" * 60)
+    print(f"Gesamt-Einsparpotential: {total_bytes:,} Bytes")
+    print("Hinweis: Dieses Script aendert keine Dateien. Empfehlungen manuell umsetzen.")
 
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python3 apply_progressive_disclosure.py <claude-md-path> [--dry-run]")
+        print("Usage: python3 apply_progressive_disclosure.py <claude-md-path>")
+        print("\nAnalysiert CLAUDE.md auf Auslagerungs-Kandidaten (Modular Disclosure).")
+        print("Aendert keine Dateien — gibt nur Empfehlungen aus.")
         print("\nExamples:")
-        print("  python3 apply_progressive_disclosure.py CLAUDE.md --dry-run")
         print("  python3 apply_progressive_disclosure.py CLAUDE.md")
         sys.exit(1)
 
     file_path = sys.argv[1]
-    dry_run = '--dry-run' in sys.argv
+    candidates = analyze_modular_disclosure(file_path)
+    print_report(file_path, candidates)
 
-    success = apply_progressive_disclosure(file_path, dry_run)
-    sys.exit(0 if success else 1)
+    # Exit code: 2 if candidates found, 0 if clean
+    sys.exit(2 if candidates else 0)
 
 
 if __name__ == "__main__":

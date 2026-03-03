@@ -5,8 +5,8 @@ description: >
   injection and Session-Continuous patterns. Use when CLAUDE.md exceeds 8KB, when
   Decision Log has >10 entries, or when users mention "CLAUDE.md too large",
   "optimize CLAUDE.md", "reduce CLAUDE.md size", or "Decision Log auslagern".
-  Migrates Decision Log to docs/DECISION-LOG.md, applies Progressive Disclosure,
-  and maintains injection markers for project-init compatibility.
+  Migrates Decision Log to docs/DECISION-LOG.md, applies Modular Disclosure
+  (outsourcing to separate files), and maintains injection markers for project-init compatibility.
 context: fork
 agent: general-purpose
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
@@ -37,7 +37,7 @@ Optimize CLAUDE.md files for session-continuous projects. Target: <8KB while pre
    python3 scripts/migrate_decision_log.py CLAUDE.md
    ```
 
-4. **Apply Progressive Disclosure:**
+4. **Apply Modular Disclosure (outsource resolved sections):**
    ```bash
    python3 scripts/apply_progressive_disclosure.py CLAUDE.md
    ```
@@ -116,14 +116,14 @@ Decision Logs grow with project maturity. When >10 entries (~2KB), externalize t
 *20 Eintraege insgesamt.*
 ```
 
-### 3. Progressive Disclosure
+### 3. Modular Disclosure
 
-Use `<details>` tags for historical/resolved content:
+Outsource historical/resolved content to separate files:
 
-- Resolved Open Questions
-- Solved Challenges (Bekannte Herausforderungen gelöst)
-- Reference sections (Referenzen, Häufige Tasks)
-- Large tables (>8 rows)
+- Resolved Open Questions → eigene Datei oder entfernen
+- Solved Challenges → docs/ oder entfernen
+- Reference sections → separate Datei mit Link
+- Large tables (>8 rows) → auslagern oder kuerzen
 
 ## Detailed Workflows
 
@@ -163,7 +163,7 @@ python3 scripts/migrate_decision_log.py CLAUDE.md
 - Replaces inline table with link
 - Keeps last 3 decisions as summary
 
-### Progressive Disclosure
+### Modular Disclosure
 
 ```bash
 # Preview:
@@ -173,11 +173,11 @@ python3 scripts/apply_progressive_disclosure.py CLAUDE.md --dry-run
 python3 scripts/apply_progressive_disclosure.py CLAUDE.md
 ```
 
-**Wraps in `<details>`:**
-- Resolved Open Questions
-- Solved Challenges
-- Reference sections
-- Large tables (>8 rows, excluding task tables)
+**Outsources to separate files or removes:**
+- Resolved Open Questions → entfernen oder auslagern
+- Solved Challenges → entfernen oder auslagern
+- Reference sections → separate Datei mit Link
+- Large tables (>8 rows) → kuerzen oder auslagern
 
 ## Template Reference
 
@@ -204,7 +204,7 @@ See `assets/claude-md-template.txt` for the optimized CLAUDE.md structure with:
 **Workflow:**
 1. Analyze: `python3 scripts/analyze_claude_md.py CLAUDE.md`
 2. Migrate Decision Log (saves ~3-5KB)
-3. Apply Progressive Disclosure
+3. Apply Modular Disclosure (outsource sections)
 4. Verify: Exit code 0
 
 ### Scenario 2: Many Decision Log Entries
@@ -269,7 +269,7 @@ See `assets/claude-md-template.txt` for the optimized CLAUDE.md structure with:
 | Workflow Reference | ~1.5KB | Compact (statt ~10KB inline) |
 | Project-specific | <4KB | Mehr Budget verfügbar |
 | Decision Log inline | <500B | Link + 3 summaries |
-| Other sections | Minimal | Use Progressive Disclosure |
+| Other sections | Minimal | Use Modular Disclosure (outsource) |
 
 **Mit External Reference:** Das 8KB-Ziel ist jetzt realistisch erreichbar:
 - Workflow Reference: ~1.5KB (statt ~10KB inline)
@@ -301,5 +301,5 @@ After optimization:
 - [ ] Decision Log externalized to docs/DECISION-LOG.md
 - [ ] Workflow injection markers present
 - [ ] "Session-Continuous Workflow" string exists
-- [ ] Progressive Disclosure applied to resolved sections
+- [ ] Modular Disclosure applied (resolved sections outsourced or removed)
 - [ ] /run-next-tasks still works

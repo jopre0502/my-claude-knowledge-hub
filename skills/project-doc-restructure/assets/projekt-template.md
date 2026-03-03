@@ -104,8 +104,7 @@
 
 ## 🚀 Phase {{PLANNED_PHASE}}: {{PLANNED_PHASE_NAME}} (GEPLANT)
 
-<details>
-<summary>{{PLANNED_SUMMARY}} - Klick für Details</summary>
+> Geplant — Details werden bei Phase-Start ergaenzt.
 
 **Ziel:** {{PLANNED_GOAL}}
 
@@ -114,12 +113,10 @@
 - [ ] {{PLANNED_TASK_2}}
 - [ ] {{PLANNED_TASK_3}}
 
-**Abhängigkeiten:**
-- Benötigt Abschluss von Phase {{DEPENDENCY}}
+**Abhaengigkeiten:**
+- Benoetigt Abschluss von Phase {{DEPENDENCY}}
 
-**Geschätzter Aufwand:** {{ESTIMATED_EFFORT}}
-
-</details>
+**Geschaetzter Aufwand:** {{ESTIMATED_EFFORT}}
 
 ---
 
@@ -134,25 +131,6 @@ Dies reduziert die PROJEKT.md Groesse und verbessert die Session-Kontinuitaet.
 Automatische Migration:
   python3 migrate_completed_phases.py PROJEKT.md --dry-run
   python3 migrate_completed_phases.py PROJEKT.md --auto
-
-ALTERNATIVE: Inline-Version (wenn Phase klein genug ist):
-
-<details>
-<summary>Alle Tasks abgeschlossen (100%) - Klick fuer Details</summary>
-
-**Abschlussdatum:** {{COMPLETION_DATE}}
-
-**Ergebnisse:**
-- ✅ {{DELIVERABLE_1}}
-- ✅ {{DELIVERABLE_2}}
-
-**Tasks:**
-
-| UUID | Task | Status | Dependencies | Effort | Deliverable | Task-File |
-|------|------|--------|--------------|--------|-------------|-----------|
-| {{TASK_ID_1}} | {{COMPLETED_TASK_1}} | ✅ Erledigt | {{DEPENDENCIES_1}} | {{EFFORT_1}} | {{DELIVERABLE_1}} | [Details](tasks/{{TASK_ID_1}}/{{TASK_ID_1}}.md) |
-
-</details>
 -->
 
 ---
@@ -175,25 +153,21 @@ ALTERNATIVE: Inline-Version (wenn Phase klein genug ist):
 
 ## 📚 Reference Information
 
-<details>
-<summary>Entscheidungslog</summary>
+### Entscheidungslog
 
-| Datum | Entscheidung | Begründung | Phase |
-|-------|--------------|------------|-------|
+> Vollstaendiger Log: [docs/DECISION-LOG.md](docs/DECISION-LOG.md)
+
+| Datum | Entscheidung | Begruendung | Phase |
+|-------|--------------|-------------|-------|
 | {{DATE_1}} | {{DECISION_1}} | {{RATIONALE_1}} | {{PHASE_1}} |
 | {{DATE_2}} | {{DECISION_2}} | {{RATIONALE_2}} | {{PHASE_2}} |
 
-</details>
-
-<details>
-<summary>Offene Fragen</summary>
+### Offene Fragen
 
 | # | Frage | Status | Verantwortlich |
 |---|-------|--------|----------------|
 | {{Q_ID_1}} | {{QUESTION_1}} | {{Q_STATUS_1}} | {{Q_OWNER_1}} |
 | {{Q_ID_2}} | {{QUESTION_2}} | {{Q_STATUS_2}} | {{Q_OWNER_2}} |
-
-</details>
 
 ---
 
