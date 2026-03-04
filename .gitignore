@@ -23,6 +23,10 @@
 !SECURITY.md
 !CHANGELOG.md
 
+# ===== WHITELIST: GitHub Config =====
+!.github/
+!.github/**
+
 # ===== WHITELIST: Agent Definitions =====
 !agents/
 !agents/*.md
