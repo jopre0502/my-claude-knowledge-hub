@@ -18,6 +18,7 @@ TIMESTAMP="$(date '+%Y-%m-%d %H:%M')"
 SKILL_COUNT=0
 AGENT_COUNT=0
 COMMAND_COUNT=0
+RULE_COUNT=0
 HOOK_COUNT=0
 PLUGIN_COUNT=0
 
@@ -166,6 +167,41 @@ extract_description() {
   fi
   echo ""
   echo "**Gesamt:** $COMMAND_COUNT Commands"
+  echo ""
+  echo "---"
+  echo ""
+
+  # --- 3b. Rules ---
+  echo "## 3b. Rules (~/.claude/rules/)"
+  echo ""
+  echo "Rules werden automatisch in den Kontext geladen. Optional mit \`paths:\` Frontmatter fuer dateityp-spezifische Aktivierung."
+  echo ""
+  echo "| Rule | Scope | Beschreibung |"
+  echo "|------|-------|-------------|"
+  RULES_DIR="$CLAUDE_DIR/rules"
+  if [[ -d "$RULES_DIR" ]]; then
+    for rule_file in "$RULES_DIR"/*.md; do
+      [[ -f "$rule_file" ]] || continue
+      rule_name="$(basename "$rule_file" .md)"
+      # Check for paths: frontmatter (conditional loading)
+      paths_line=""
+      if head -1 "$rule_file" | grep -q '^---$'; then
+        paths_line=$(sed -n '/^---$/,/^---$/p' "$rule_file" 2>/dev/null | grep -m1 '^paths:' | sed 's/^paths:[[:space:]]*//')
+      fi
+      if [[ -n "$paths_line" ]]; then
+        scope="Conditional: \`$paths_line\`"
+      else
+        scope="Global"
+      fi
+      # Extract first heading or first non-empty content line as description
+      rule_desc=$(grep -m1 '^# ' "$rule_file" 2>/dev/null | sed 's/^# //')
+      [[ -z "$rule_desc" ]] && rule_desc="(kein Heading)"
+      echo "| \`$rule_name\` | $scope | $rule_desc |"
+      RULE_COUNT=$((RULE_COUNT + 1))
+    done
+  fi
+  echo ""
+  echo "**Gesamt:** $RULE_COUNT Rules"
   echo ""
   echo "---"
   echo ""
@@ -393,5 +429,6 @@ echo "SETUP-REFERENCE.md generiert: $OUTPUT"
 echo "  Skills:   $SKILL_COUNT"
 echo "  Agents:   $AGENT_COUNT"
 echo "  Commands: $COMMAND_COUNT"
+echo "  Rules:    $RULE_COUNT"
 echo "  Hooks:    $HOOK_COUNT"
 echo "  Plugins:  $PLUGIN_COUNT"

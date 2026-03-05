@@ -2,7 +2,7 @@
 name: setup-reference
 description: >
   Generiert eine vollstaendige SETUP-REFERENCE.md aus dem Live-System
-  (~/.claude/). Scannt Skills, Agents, Commands, Hooks, Permissions,
+  (~/.claude/). Scannt Skills, Agents, Commands, Rules, Hooks, Permissions,
   Plugins und Secrets-Dateien deterministisch. Eliminiert manuelle
   Pflege und Staleness-Risiko. Primaerquelle fuer den my-setup-guide Agent.
   Trigger: /refresh-reference oder manuell.
@@ -45,6 +45,7 @@ Der Command ruft `scripts/generate-reference.sh` auf und zeigt eine Zusammenfass
 1. Skills (`~/.claude/skills/*/SKILL.md`)
 2. Agents (`~/.claude/agents/*.md`)
 3. Commands (`~/.claude/commands/*.md`)
+3b. Rules (`~/.claude/rules/*.md`) — mit Scope-Erkennung (Global vs. Conditional via `paths:`)
 4. Hooks (`settings.json → .hooks`)
 5. Permissions (`settings.json → .permissions`)
 6. Plugins (`settings.json → .enabledPlugins`)
