@@ -9,8 +9,11 @@
 # Ignore everything by default
 *
 
-# ===== WHITELIST: Git Config =====
+# ===== WHITELIST: Git Config & Tooling =====
 !.gitignore
+!.gitattributes
+!.editorconfig
+!.markdownlint.jsonc
 
 # ===== WHITELIST: Global Claude Instructions =====
 !CLAUDE.md
