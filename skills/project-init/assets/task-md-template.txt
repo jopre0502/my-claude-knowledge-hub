@@ -1,17 +1,20 @@
+---
+uuid: TASK-{{TASK_ID}}
+status: pending
+created: {{DATE}}
+updated: {{DATE}}
+effort: {{EFFORT_ESTIMATE}}
+dependencies: {{DEPENDENCIES}}
+tags: []
+---
+
 # TASK-{{TASK_ID}}: {{TASK_NAME}}
 
 > **Task-Erstellung Checkliste:**
 > 1. Kopiere dieses Template → `{{DOCS_PATH}}/tasks/TASK-{{TASK_ID}}-name.md`
 > 2. Erstelle Ordner: `mkdir -p {{DOCS_PATH}}/tasks/TASK-{{TASK_ID}}/{execution-logs,artifacts}`
-> 3. Fülle Template aus (Objective, Steps, Criteria)
+> 3. Fuelle Template aus (Objective, Steps, Criteria)
 > 4. Trage Task in PROJEKT.md Task-Tabelle ein
-
-**UUID:** TASK-{{TASK_ID}}
-**Status:** 📋 pending | ⏳ in_progress | 📘 ongoing | ✅ completed | 🚫 blocked | ❌ cancelled
-**Created:** {{DATE}}
-**Updated:** {{DATE}}
-**Effort:** {{EFFORT_ESTIMATE}}
-**Dependencies:** {{DEPENDENCIES}}
 
 ---
 
@@ -45,9 +48,9 @@ What should be done? What is the expected outcome?
 
 | # | Action | Status | Zyklus | Commit | Effort |
 |---|--------|--------|--------|--------|--------|
-| 1 | {{STEP_1}} | 📋 pending | — | — | {{EFFORT}} |
-| 2 | {{STEP_2}} | 📋 pending | — | — | {{EFFORT}} |
-| 3 | {{STEP_3}} | 📋 pending | — | — | {{EFFORT}} |
+| 1 | {{STEP_1}} | pending | — | — | {{EFFORT}} |
+| 2 | {{STEP_2}} | pending | — | — | {{EFFORT}} |
+| 3 | {{STEP_3}} | pending | — | — | {{EFFORT}} |
 
 > **Action Tracking:** Zyklus = Session-Nummer, Commit = Git-Hash nach Completion.
 > Der Task-Orchestrator nutzt diese Tabelle fuer Cross-Cycle Continuation.
@@ -68,14 +71,14 @@ What should be done? What is the expected outcome?
 
 ## Definition of Done (DoD)
 
-Standard DoD für Task-Completion:
+Standard DoD fuer Task-Completion:
 
-- [ ] Alle Acceptance Criteria erfüllt
-- [ ] Task-Status in PROJEKT.md → `✅ completed`
+- [ ] Alle Acceptance Criteria erfuellt
+- [ ] Task-Status in PROJEKT.md → `completed`
 - [ ] Audit Trail aktualisiert (Datum + Outcome)
 - [ ] **Projekt-spezifisch:** Relevante Dokumentation aktualisiert (z.B. PKM-WORKFLOW.md, CLAUDE.md)
 
-> **Hinweis:** Falls dieser Task neue Tools, Scripts oder Workflows produziert, müssen diese in der entsprechenden Projekt-Dokumentation nachgetragen werden.
+> **Hinweis:** Falls dieser Task neue Tools, Scripts oder Workflows produziert, muessen diese in der entsprechenden Projekt-Dokumentation nachgetragen werden.
 
 ---
 

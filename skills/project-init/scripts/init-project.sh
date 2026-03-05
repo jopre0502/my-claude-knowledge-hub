@@ -254,13 +254,17 @@ echo -e "${BLUE}Step 4: Creating first task (TASK-001)...${NC}"
 
 if [ ! -f "$PROJECT_DIR/$DOCS_DIR/tasks/TASK-001-setup.md" ]; then
     cat > "$PROJECT_DIR/$DOCS_DIR/tasks/TASK-001-setup.md" << 'EOF'
-# TASK-001: Project Setup
+---
+uuid: TASK-001
+status: pending
+created: __DATE__
+updated: __DATE__
+effort: 1h
+dependencies: none
+tags: [infrastructure]
+---
 
-**UUID:** TASK-001
-**Status:** pending
-**Created:** __DATE__
-**Effort:** 1h
-**Dependencies:** None
+# TASK-001: Project Setup
 
 ---
 

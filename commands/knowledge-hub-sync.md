@@ -53,6 +53,38 @@ Repo: my-claude-knowledge-hub
 ```
 Stoppe hier.
 
+### Step 2b: README Drift-Check
+
+Pruefe ob die README.md "At a glance"-Tabelle noch zum tatsaechlichen Inhalt passt:
+
+```bash
+HUB_DIR="$HOME/.claude"
+bash "$HUB_DIR/skills/setup-reference/scripts/readme-drift-check.sh"
+```
+
+**Exit-Code 0 (kein Drift):** Weiter mit Step 3.
+
+**Exit-Code 2 (README nicht parsebar):** Hinweis ausgeben, weiter mit Step 3.
+
+**Exit-Code 1 (Drift erkannt):** Zeige dem User die Drift-Details und frage via AskUserQuestion:
+
+```
+README Drift erkannt:
+[Output des Scripts einfuegen]
+
+Optionen:
+1. README "At a glance" Zahlen jetzt aktualisieren, dann weiter mit Sync
+2. Ignorieren und trotzdem syncen
+3. Abbrechen
+```
+
+**Bei Option 1:** Aktualisiere NUR die Zahlen in der "At a glance"-Tabelle der README.md.
+Verwende das Edit-Tool um die jeweiligen Zahlenwerte in den Tabellenzeilen zu ersetzen
+(z.B. `| **Skills** | 18 |` → `| **Skills** | 17 |`). Keine anderen Bereiche aendern.
+
+**Bei Option 2:** Weiter mit Step 3.
+**Bei Option 3:** Abbrechen.
+
 ### Step 3: Aenderungen anzeigen und bestaetigen
 
 Zaehle geaenderte Dateien nach Kategorie und zeige dem User via AskUserQuestion:

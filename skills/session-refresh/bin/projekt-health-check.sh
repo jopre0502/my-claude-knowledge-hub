@@ -62,16 +62,34 @@ normalize_status() {
 
 # Extract status from task file header - pure bash, zero subprocesses
 # Sets REPLY variable instead of echo (avoids subshell)
+# Supports: YAML frontmatter (---\nstatus: ...\n---) and legacy bold-inline (**Status:** ...)
 get_task_file_status() {
     local file="$1"
     if [[ ! -f "$file" ]]; then
         REPLY="missing"
         return
     fi
-    # Read first 20 lines, match **Status:** or Status: pattern
     local line_count=0
     local status_line=""
+    local in_frontmatter=0
     while IFS= read -r fline && (( line_count++ < 20 )); do
+        fline="${fline%$'\r'}"
+        # YAML frontmatter detection
+        if (( line_count == 1 )) && [[ "$fline" == "---" ]]; then
+            in_frontmatter=1
+            continue
+        fi
+        if (( in_frontmatter == 1 )); then
+            if [[ "$fline" == "---" ]]; then
+                break
+            fi
+            if [[ "${fline,,}" == status:* ]]; then
+                status_line="$fline"
+                break
+            fi
+            continue
+        fi
+        # Legacy bold-inline format
         if [[ "$fline" == \*\*Status:\*\** ]]; then
             status_line="$fline"
             break

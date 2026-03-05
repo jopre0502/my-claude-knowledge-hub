@@ -16,22 +16,103 @@ model: sonnet
 
 ---
 
-## Command Routing
+## Turnkey Commands (Copy-Paste Ready)
 
-| User Intent | CLI Command | Fallback |
-|-------------|-------------|----------|
-| `vault:name` | `search query="<name>"` → `read file="<path>"` | Glob + Read Tool |
-| "suche im vault" | `search query="<text>"` | Glob |
-| "zeige tags" | `tags all counts` | grep |
-| "tag X finden" | `tag name="<tag>" verbose` | grep |
-| "backlinks zu X" | `backlinks file="<name>"` | nicht verfuegbar |
-| "base Bewerbungen" | `base:query path=<path>` | vault-base.sh |
-| "daily note" | `daily:read` | Glob + Read |
-| "property lesen" | `property:read name=<n> file=<path>` | YAML parse |
-| "exportiere als Werk" | `create name=<n> template=<t>` + `append` | vault-export.sh |
-| "bearbeite" | vault-edit.sh | — |
-| "vault health" | `orphans`, `deadends`, `unresolved`, `vault info` | nicht verfuegbar |
-| unbekannter command | `help` → retry | User informieren |
+**Prinzip:** IMMER `file="<name>"` (Dokumentname ohne .md). NIEMALS Pfade. NIEMALS direkter Dateizugriff (Read/Glob/Write auf Vault).
+
+### Read & Discovery
+
+```bash
+# Dokument lesen
+obsidian.com read file="<name>"
+
+# Dokument suchen
+obsidian.com search query="<text>"
+
+# Properties lesen
+obsidian.com properties file="<name>"
+
+# Einzelne Property lesen
+obsidian.com property:read name="<key>" file="<name>"
+```
+
+### Write & Edit
+
+```bash
+# Property setzen/aendern
+obsidian.com property:set file="<name>" name="<key>" value="<value>"
+
+# Property entfernen
+obsidian.com property:remove file="<name>" name="<key>"
+
+# Content anhaengen (an Ende)
+obsidian.com append file="<name>" content="<text>"
+
+# Content voranstellen (an Anfang, nach Frontmatter)
+obsidian.com prepend file="<name>" content="<text>"
+
+# Neues Dokument erstellen
+obsidian.com create name="<name>" [template="<template>"]
+```
+
+### Tags & Links
+
+```bash
+# Alle Tags mit Anzahl
+obsidian.com tags all counts
+
+# Dokumente mit bestimmtem Tag
+obsidian.com tag name="<tag>" verbose
+
+# Backlinks zu Dokument
+obsidian.com backlinks file="<name>"
+```
+
+### Bases & Daily Notes
+
+```bash
+# Alle Bases listen
+obsidian.com bases
+
+# Base Query ausfuehren
+obsidian.com base:query path="<base-path.base>"
+
+# Daily Note lesen
+obsidian.com daily:read
+
+# An Daily Note anhaengen
+obsidian.com daily:append content="<text>"
+```
+
+### Vault Health & System
+
+```bash
+# Vault-Info
+obsidian.com vault
+
+# Orphans / Deadends / Unresolved
+obsidian.com orphans
+obsidian.com deadends
+obsidian.com unresolved
+```
+
+### Routing-Tabelle
+
+| User Intent | Turnkey Command |
+|-------------|----------------|
+| `vault:name` | `search query="<name>"` → `read file="<name>"` |
+| "suche im vault" | `search query="<text>"` |
+| "zeige tags" | `tags all counts` |
+| "tag X finden" | `tag name="<tag>" verbose` |
+| "backlinks zu X" | `backlinks file="<name>"` |
+| "property lesen" | `property:read name="<key>" file="<name>"` |
+| "property aendern" | `property:set file="<name>" name="<key>" value="<value>"` |
+| "fuege hinzu" | `append file="<name>" content="<text>"` |
+| "exportiere als Werk" | `create name="<n>" template="<t>"` + `append` |
+| "base Bewerbungen" | `base:query path="<path.base>"` |
+| "daily note" | `daily:read` |
+| "vault health" | `orphans`, `deadends`, `unresolved`, `vault` |
+| "bearbeite" (Full Rewrite) | vault-edit.sh `<name>` (nur wenn ganzer Body ersetzt wird) |
 
 ---
 
@@ -42,55 +123,66 @@ model: sonnet
 ```bash
 obsidian.com version 2>&1; echo "EXIT:$?"
 ```
-- Exit 0 + sinnvoller Output → **CLI verfuegbar**
-- Exit != 0 → **Fallback-Modus** (kein weiterer CLI-Versuch in dieser Session)
-- Meldung: "CLI nicht verfuegbar, nutze Filesystem-Fallback"
+- Exit 0 → **CLI verfuegbar**, weiter mit Turnkey Commands
+- Exit != 0 → **User informieren:** "Obsidian App muss laufen. Bitte starten."
+- **Kein Filesystem-Fallback.** CLI ist der einzige Zugangsweg.
 
 ### 2. Document Discovery + Loading
 
-**CLI-Pfad:**
+**Immer ueber Dokumentname, nie ueber Pfade:**
 ```bash
 obsidian.com search query="<name>"       # Discovery
-obsidian.com read file="<path>"          # Content
-obsidian.com properties file="<path>"    # Metadata (optional)
+obsidian.com read file="<name>"          # Content (file= nimmt Dokumentname)
+obsidian.com properties file="<name>"    # Metadata (optional)
 ```
 
-**Fallback-Pfad (CLI nicht verfuegbar):**
-- Vault-Pfad via `$OBSIDIAN_VAULT` (Offline-Fallback, optional)
-- Glob Tool: `<vault-path>/**/*<name>*.md` (nur Dateinamen-Match)
-- Read Tool: Direkt auf `<vault-path>/<path>`
-- Frontmatter: Manuell aus YAML-Block parsen
+### 3. Fehlerbehandlung (Self-Healing)
 
-### 3. Fehlerbehandlung
+Bei CLI-Fehlern → **obsidian.com help** konsultieren → Syntax korrigieren → retry:
 
-Bei CLI-Fehlern: `obsidian.com help <command>` konsultieren, Syntax pruefen, retry.
-Erst wenn help keine Loesung liefert → User den Fehler + help-Output melden.
+```bash
+# Schritt 1: Help fuer den fehlgeschlagenen Command
+obsidian.com help <command> 2>&1
 
-**NIEMALS:** Parameter-Kombinationen raten oder experimentell ausprobieren.
+# Schritt 2: Mit korrekter Syntax wiederholen
+obsidian.com <command> <korrigierte-parameter>
+```
+
+**Wenn Help-basierter Retry funktioniert:** Weiterarbeiten (self-healing).
+**Wenn Help-basierter Retry fehlschlaegt:** User den Fehler + help-Output melden.
+
+**NIEMALS:**
+- Parameter-Kombinationen raten oder experimentell ausprobieren
+- Auf Filesystem-Zugriff ausweichen (Read/Glob/Write auf Vault-Dateien)
+- Pfade konstruieren oder Vault-Pfad ermitteln (ausser fuer vault-edit.sh Full Rewrite)
 
 ---
 
-## CLI Command Reference
+## CLI Command Reference (Vollstaendig)
 
 Alle Commands mit Prefix `obsidian.com`. Obsidian App muss laufen (Named Pipe).
+**Bei unbekanntem Command:** `obsidian.com help` oder `obsidian.com help <command>`.
+
+<details>
+<summary>Vollstaendige CLI Reference (aufklappen bei Bedarf)</summary>
 
 ### Read & Search
 ```
-read file=<name> | path=<path>
+read file=<name>
 search query=<text> [path= limit= format=]
-file file=<name> | path=<path>
+file file=<name>
 files [folder= ext= total]
 outline file=<name> [format=tree|md|json]
 ```
 
 ### Properties & Tags
 ```
-properties [file= counts sort= format=]
-tags [file= counts sort= format=]
+properties [file=<name> counts sort= format=]
+tags [file=<name> counts sort= format=]
 tag name=<tag> [total verbose]
-property:read name=<n> [file=<path>]
-property:set name=<n> value=<v> file=<path>
-property:remove name=<n> file=<path>
+property:read name=<n> [file=<name>]
+property:set name=<n> value=<v> file=<name>
+property:remove name=<n> file=<name>
 ```
 
 ### Links & Vault Health
@@ -100,23 +192,22 @@ links file=<name> [total]
 orphans [total all]
 deadends [total all]
 unresolved [total counts verbose format=]
-aliases [file= format=]
+aliases [file=<name> format=]
 ```
 
 ### Bases
 ```
-bases                                    — list all .base files
-base:query path=<base-path> [view=<name>] [format=json]
-base:views                               — views of currently active base
+bases
+base:query path=<base-path.base> [view=<name>] [format=json]
+base:views
 base:create file=<base-path> [name= content=]
 ```
-**Hinweis:** `base:query path=...` arbeitet im Hintergrund (Base wird NICHT als Tab geoeffnet).
 
 ### Daily Notes
 ```
-daily                                    — open daily note
-daily:read                               — read today's content
-daily:path                               — get file path
+daily
+daily:read
+daily:path
 daily:append content=<text>
 daily:prepend content=<text>
 ```
@@ -133,7 +224,7 @@ delete file=<n> [permanent]
 
 ### Tasks
 ```
-tasks [file= done todo status= verbose format=]
+tasks [file=<name> done todo status= verbose format=]
 task ref=<path:line> [toggle done todo]
 ```
 
@@ -151,12 +242,14 @@ workspace
 
 ### Developer Tools
 ```
-eval code="<javascript>"               — JS in Obsidian context
-diff file=<path>
+eval code="<javascript>"
+diff file=<name>
 history / history:list / history:read / history:restore
 sync / sync:status / sync:history
 web url=<url>
 ```
+
+</details>
 
 ---
 
@@ -181,7 +274,7 @@ Scripts unter `~/.claude/skills/vault-manager/scripts/`:
 ### Prerequisites
 - `obsidian.com` im PATH
 - Obsidian App muss laufen (CLI kommuniziert via Named Pipe)
-- `OBSIDIAN_VAULT` — Optional, Offline-Fallback (auto via SessionStart Hook aus `~/.config/secrets/env.d/vault.env`)
+- Kein `OBSIDIAN_VAULT` noetig (CLI liefert alles, Filesystem-Zugriff nicht vorgesehen)
 
 ### Sub-Agent-Nutzung
 Sub-Agents koennen CLI direkt nutzen (Named Pipe ist OS-Level, kein env var noetig).
@@ -214,15 +307,11 @@ ls ~/.claude/skills/vault-manager/scripts/*.sh  # Scripts vorhanden?
 
 ---
 
-## Nicht verfuegbar im Fallback-Modus
+## Kein Fallback-Modus
 
-Folgende Features funktionieren NUR mit laufender Obsidian App:
-- Backlinks / Links (Incoming/Outgoing)
-- Orphans / Deadends / Unresolved (Vault Health)
-- Vault Info (Statistiken)
-- Content-Search (Volltext innerhalb von Dokumenten)
-
-Meldung: "Diese Funktion erfordert eine laufende Obsidian App."
+**Alle Vault-Operationen erfordern eine laufende Obsidian App** (CLI via Named Pipe).
+Wenn Obsidian nicht laeuft → User informieren: "Bitte Obsidian starten."
+Es gibt keinen Filesystem-Fallback. Kein Read/Glob/Write auf Vault-Dateien.
 
 ---
 
@@ -237,4 +326,4 @@ Meldung: "Diese Funktion erfordert eine laufende Obsidian App."
 
 **Strategy:** CLI+Bash Hybrid (ADR-005). CLI fuer Read/Search/Tags, Bash fuer Export/Edit/Base/Date.
 
-Last Updated: 2026-03-03
+Last Updated: 2026-03-05
