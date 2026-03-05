@@ -1,4 +1,4 @@
-# SETUP-REFERENCE — Auto-generated: 2026-03-05 15:20
+# SETUP-REFERENCE — Auto-generated: 2026-03-05 18:48
 
 Generiert aus Live-System (`~/.claude/`). Nicht manuell bearbeiten.
 
@@ -9,6 +9,7 @@ Generiert aus Live-System (`~/.claude/`). Nicht manuell bearbeiten.
 | Skill | Beschreibung |
 |-------|-------------|
 | `claude-md-restructure` | Optimize CLAUDE.md files for size (<8KB target) while preserving workflow-block.txt injection and Session-Continuous ... |
+| `generate-pwd-howto` | (keine Beschreibung) |
 | `github-init` | Verknüpft aktuelles Working Directory mit GitHub-Repo und erstellt Pro-Projekt Config (.claude/github.json). Use whe... |
 | `github-ops` | Shared Library für GitHub-Operations Skills. Enthält lib/, assets/, references/. NICHT direkt aufrufen. Nutze statt... |
 | `github-push` | Committed und pusht alle Änderungen zum konfigurierten GitHub-Repo mit Sync-Message (Sync YYYY-MM-DD-NN). Use when: ... |
@@ -20,13 +21,13 @@ Generiert aus Live-System (`~/.claude/`). Nicht manuell bearbeiten.
 | `project-init` | Complete session-continuous project initialization infrastructure. Creates CLAUDE.md, PROJEKT.md, task tracking syste... |
 | `prompt-improver` | Analysiert und verbessert Prompt-Entwürfe für Claude 4.x Modelle (Sonnet, Opus, Haiku). Wendet offizielle Anthropic Best Practices an: XML-Strukturierung, explizite Anweisungen, Kontext/Motivation (WARUM), Variablen {{NAME}}, Extended Thinking Konfiguration, Tool Use Optimierungen und modell-spezifische Empfehlungen. Nutze diesen Skill wenn du einen Prompt siehst der verbessert werden sollte, oder wenn explizit nach Prompt-Optimierung gefragt wird. |
 | `session-refresh` | **SESSION END / HIGH TOKEN BUDGET** - Use when token budget >65% or before ending a session. Complete session refresh... |
-| `setup-reference` | Generiert eine vollstaendige SETUP-REFERENCE.md aus dem Live-System (~/.claude/). Scannt Skills, Agents, Commands, Ho... |
+| `setup-reference` | Generiert eine vollstaendige SETUP-REFERENCE.md aus dem Live-System (~/.claude/). Scannt Skills, Agents, Commands, Ru... |
 | `skill-creator` | Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends Claude's capabilities with specialized knowledge, workflows, or tool integrations. |
 | `task-orchestrator` | Orchestriert strukturierte Task-Ausführung mit Subagent Delegation. Trigger-Patterns (automatisch aktivieren bei): -... |
 | `task-scheduler` | Automatically orchestrate and execute project tasks from PROJEKT.md. Use this skill when you want to analyze pending ... |
 | `vault-manager` | Use this skill when the user references Vault documents via vault: prefix notation (e.g., "vault:ai-workflows"), requ... |
 
-**Gesamt:** 17 Skills
+**Gesamt:** 18 Skills
 
 ---
 
@@ -53,6 +54,18 @@ Generiert aus Live-System (`~/.claude/`). Nicht manuell bearbeiten.
 | `/vault-work` | Load a Vault document for editing, work with it in session, then save changes back with diff preview |
 
 **Gesamt:** 6 Commands
+
+---
+
+## 3b. Rules (~/.claude/rules/)
+
+Rules werden automatisch in den Kontext geladen. Optional mit `paths:` Frontmatter fuer dateityp-spezifische Aktivierung.
+
+| Rule | Scope | Beschreibung |
+|------|-------|-------------|
+| `vault-access` | Global | Vault Access via Obsidian CLI |
+
+**Gesamt:** 1 Rules
 
 ---
 
@@ -231,6 +244,8 @@ Generiert aus Live-System (`~/.claude/`). Nicht manuell bearbeiten.
 
 | Dokument | Pfad | Groesse |
 |----------|------|---------|
+| `HOW-TO-OBSIDIANCLAUDE.md` | `~/.claude/skills/setup-reference/references/` | 8KB |
+| `HOW-TO-PROJEKT-AUTOMATION-HUB.md` | `~/.claude/skills/setup-reference/references/` | 8KB |
 | `HOW-TO-PROJEKT-AUTOMATION.md` | `~/.claude/skills/setup-reference/references/` | 28KB |
 | `PKM-WORKFLOW-VAULT-MANAGER.md` | `~/.claude/skills/setup-reference/references/` | 13KB |
 
@@ -385,5 +400,5 @@ source ~/.config/secrets/.env-cache
 
 ---
 
-*Generiert: 2026-03-05 15:20 | Script: generate-reference.sh*
+*Generiert: 2026-03-05 18:48 | Script: generate-reference.sh*
 *Naechste Aktualisierung: /refresh-reference ausfuehren*

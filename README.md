@@ -14,7 +14,7 @@ A curated collection of **Claude Code** extensions that turn the CLI into a full
 
 | Component | Count | Examples |
 |-----------|-------|----------|
-| **Skills** | 17 | session-refresh, vault-manager, task-orchestrator, prompt-improver |
+| **Skills** | 18 | session-refresh, vault-manager, task-orchestrator, prompt-improver |
 | **Agents** | 2 | my-setup-guide, prompt-architect |
 | **Commands** | 6 | obsidian-sync, vault-export, run-next-tasks |
 | **Hooks** | 5 | session-env-loader, notify, session-handoff-loader |

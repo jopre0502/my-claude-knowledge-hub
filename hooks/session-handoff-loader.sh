@@ -119,12 +119,41 @@ SETUP-REFERENCE.md ist ${DAYS_OLD} Tage alt. Empfehlung: /refresh-reference ausf
 fi
 
 # ============================================================================
+# Optional: HOW-TO Staleness-Check (from CLAUDE.md tracking line)
+# ============================================================================
+
+HOWTO_STALENESS=""
+CLAUDE_MD="$PWD/CLAUDE.md"
+if [[ -f "$CLAUDE_MD" ]]; then
+  # Look for: **HOW-TO zuletzt aktualisiert:** YYYY-MM-DD
+  HOWTO_DATE=$(grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}' <<< "$(grep 'HOW-TO zuletzt aktualisiert' "$CLAUDE_MD" 2>/dev/null)" 2>/dev/null | head -1)
+  HOWTO_DATE="${HOWTO_DATE:-}"
+  if [[ -n "$HOWTO_DATE" ]]; then
+    if [[ "$(uname -s)" == "Darwin" ]]; then
+      HOWTO_EPOCH=$(date -jf "%Y-%m-%d" "$HOWTO_DATE" +%s 2>/dev/null || echo 0)
+    else
+      HOWTO_EPOCH=$(date -d "$HOWTO_DATE" +%s 2>/dev/null || echo 0)
+    fi
+    NOW_EPOCH=${NOW_EPOCH:-$(date +%s)}
+    HOWTO_DAYS=$(( (NOW_EPOCH - HOWTO_EPOCH) / 86400 ))
+    if [[ $HOWTO_DAYS -gt 7 ]]; then
+      HOWTO_STALENESS="
+HOW-TO ist ${HOWTO_DAYS} Tage alt. Empfehlung: /generate-pwd-howto ausfuehren."
+    fi
+  elif [[ -d "$PWD/$DOCS_PATH/handoffs" ]]; then
+    # Session-continuous project but no HOW-TO ever generated
+    HOWTO_STALENESS="
+Kein HOW-TO fuer dieses Projekt gefunden. Empfehlung: /generate-pwd-howto ausfuehren."
+  fi
+fi
+
+# ============================================================================
 # Build additionalContext
 # ============================================================================
 
 CONTEXT="Session-Handoff geladen (${HANDOFF_BASENAME}):
 ---
-${HANDOFF_CONTENT}${HEALTH_LINE}${STALENESS_LINE}
+${HANDOFF_CONTENT}${HEALTH_LINE}${STALENESS_LINE}${HOWTO_STALENESS}
 ---
 Hinweis: CLAUDE.md + PROJEKT.md nur bei Bedarf lesen (Handoff enthaelt Kontext der letzten Session)."
 
