@@ -41,7 +41,7 @@ categories/
 └── 10-research-analysis/     (6 Agents: research-analyst, trend-analyst, ...)
 ```
 
-*Quelle: GitHub API Tree, README.md*
+Quelle: GitHub API Tree, README.md
 
 **my-claude-knowledge-hub** baut ein integriertes Ökosystem:
 
@@ -53,13 +53,15 @@ categories/
 ├── plugins/    (1 lokales Plugin: ai-visualisation)
 └── output-styles/ (1 Executive Communication Style)
 ```
-*Quelle: Lokale Dateistruktur*
+
+Quelle: Lokale Dateistruktur
 
 **Analyse:** VoltAgent setzt auf **horizontale Skalierung** (viele Agents für viele Domänen), unser Projekt auf **vertikale Integration** (wenige, aber tiefe Skills mit Orchestrierung, Hooks und State-Management).
 
 ### 1.2 Agent/Skill-Anatomie
 
 **VoltAgent-Agent** (typisches Beispiel: `fullstack-developer.md`):
+
 ```yaml
 ---
 name: fullstack-developer
@@ -69,14 +71,16 @@ model: sonnet
 ---
 # Rollenbeschreibung + Checklisten + Collaboration Model
 ```
-*Quelle: `categories/01-core-development/fullstack-developer.md`*
+
+Quelle: `categories/01-core-development/fullstack-developer.md`
 
 - **1 Datei** pro Agent (~50-150 Zeilen geschätzt auf Basis der README-Beschreibungen)
 - YAML Frontmatter + Rollenbeschreibung + Checklisten
 - Keine begleitenden Scripts, Templates oder References
 
 **my-claude-knowledge-hub Skill** (Beispiel: `task-orchestrator`):
-```
+
+```text
 task-orchestrator/
 ├── SKILL.md (474 Zeilen, 5 Phasen mit harten Invarianten)
 └── references/
@@ -84,7 +88,8 @@ task-orchestrator/
     ├── action-budget-heuristics.md (85 Zeilen, Token-Kalibrierung)
     └── uncertainty-handling.md
 ```
-*Quelle: `skills/task-orchestrator/SKILL.md:1-60`, `references/delegation-patterns.md:1-147`*
+
+Quelle: `skills/task-orchestrator/SKILL.md:1-60`, `references/delegation-patterns.md:1-147`
 
 - **Multi-File-Architektur** mit Progressive Disclosure
 - Harte Invarianten (SATE: "Keine Action über Zyklus-Grenzen")
@@ -112,7 +117,7 @@ VoltAgent bietet 11 Agents in `09-meta-orchestration/`:
 - `agent-organizer` — Agent-Setup
 - `context-manager` — Kontext-Verwaltung
 
-*Quelle: README.md, `workflow-orchestrator.md`*
+Quelle: README.md, `workflow-orchestrator.md`
 
 **Stärke:** Breite Abdeckung von Orchestrierungsszenarien.
 **Schwäche:** Generische Rollenbeschreibungen. Der `workflow-orchestrator` beschreibt Konzepte wie "Saga Pattern" und "Circuit Breaking", liefert aber **keine konkreten Claude-Code-spezifischen Workflows** — keine Hook-Integration, kein Token-Budget-Management, keine Session-Continuity.
@@ -122,19 +127,19 @@ VoltAgent bietet 11 Agents in `09-meta-orchestration/`:
 Unser Task-Orchestrator implementiert ein **konkretes, Claude-Code-natives Ausführungsframework**:
 
 1. **Decision Frontloading** (Phase 1.4): Alle strategischen Entscheidungen VOR Ausführung klären via `AskUserQuestion`
-   *Quelle: `skills/task-orchestrator/SKILL.md:42-53`*
+   Quelle: `skills/task-orchestrator/SKILL.md:42-53`
 
 2. **Budget Intelligence** (Phase 2.5): Token-Schätzung pro Action-Typ mit Kalibrierungsdaten
-   *Quelle: `skills/task-orchestrator/references/action-budget-heuristics.md:6-18`*
+   Quelle: `skills/task-orchestrator/references/action-budget-heuristics.md:6-18`
 
 3. **Delegation Patterns**: Konkrete Entscheidungsmatrix (Subagent vs. Main Session) mit Heuristiken
-   *Quelle: `skills/task-orchestrator/references/delegation-patterns.md:7-14`*
+   Quelle: `skills/task-orchestrator/references/delegation-patterns.md:7-14`
 
 4. **Action-Level Model Hints**: `[subagent:haiku]`, `[subagent:sonnet]`, `[main]` Syntax
-   *Quelle: `skills/task-orchestrator/references/delegation-patterns.md:109-119`*
+   Quelle: `skills/task-orchestrator/references/delegation-patterns.md:109-119`
 
 5. **Cross-Cycle Continuation**: Tasks überleben Session-Grenzen via Checkpoint-System
-   *Quelle: SATE-Invarianten, Phase 1.5*
+   Quelle: SATE-Invarianten, Phase 1.5
 
 **Bewertung:**
 
@@ -162,17 +167,19 @@ Tool-Zuweisung nach Rollentyp:
 - Research: `Read, Grep, Glob, WebFetch, WebSearch`
 - Code Writer: `Read, Write, Edit, Bash, Glob, Grep`
 
-*Quelle: README.md, Model Routing Strategy Section*
+Quelle: README.md, Model Routing Strategy Section
 
 ### 3.2 Unser Projekt
 
 Action-Level Model Hints (feingranularer):
+
 ```markdown
 1. [ ] Finde alle Endpoints `[subagent:haiku]`
 2. [ ] Design Logging-Struktur `[main]`
 3. [ ] Schreibe Tests für Logger `[subagent:sonnet]`
 ```
-*Quelle: `skills/task-orchestrator/references/delegation-patterns.md:134-140`*
+
+Quelle: `skills/task-orchestrator/references/delegation-patterns.md:134-140`
 
 Modell-Auswahl nach konkretem Aufgabentyp:
 
@@ -182,7 +189,7 @@ Modell-Auswahl nach konkretem Aufgabentyp:
 | Docs/Tests generieren | `sonnet` | Moderate Komplexität |
 | Code Review, Architektur | `opus` | Tiefes Verständnis |
 
-*Quelle: `delegation-patterns.md:123-128`*
+Quelle: `delegation-patterns.md:123-128`
 
 **Bewertung:** VoltAgent definiert Model Routing **pro Agent** (statisch), unser Projekt **pro Action** (dynamisch). Unser Ansatz ist feingranularer und kosteneffizienter, da innerhalb eines Tasks verschiedene Modelle für verschiedene Schritte genutzt werden.
 
@@ -203,14 +210,14 @@ Vollständiger Session-Lifecycle:
 2. `session-handoff-loader.sh` → Kontext vorheriger Sessions laden
 3. `session-start-scheduler.sh` → Ready Tasks identifizieren
 
-*Quelle: `hooks/session-env-loader.sh:1-68`, `hooks/session-start-scheduler.sh:1-77`*
+Quelle: `hooks/session-env-loader.sh:1-68`, `hooks/session-start-scheduler.sh:1-77`
 
 **Session End:**
 - `/session-refresh` → CLAUDE.md + PROJEKT.md aktualisieren
 - Health-Check mit Exit Codes (0=Healthy, 1=Warnings, 2=Critical)
 - Conditional `/project-doc-restructure`
 
-*Quelle: `skills/session-refresh/SKILL.md:1-60`*
+Quelle: `skills/session-refresh/SKILL.md:1-60`
 
 **Cross-Session Memory:**
 - Session-Handoffs (`docs/handoffs/SESSION-HANDOFF-*.md`)
@@ -228,7 +235,7 @@ Vollständiger Session-Lifecycle:
 - Keine Secrets-Management-Strategie dokumentiert
 - Kein Permission-Audit-System
 
-*Quelle: README.md, Tool Assignment Philosophy*
+Quelle: README.md, Tool Assignment Philosophy
 
 ### 5.2 Unser Projekt
 
@@ -239,26 +246,26 @@ Mehrschichtiges Sicherheitskonzept:
    - SOPS+Age Verschlüsselung für `~/.config/secrets/env.d/*.env`
    - `secret-run` Wrapper für prozess-isolierte Secret-Injection
 
-   *Quelle: `skills/secrets-blueprint/SKILL.md:1-22`*
+   Quelle: `skills/secrets-blueprint/SKILL.md:1-22`
 
 2. **Environment Isolation**:
    - `session-env-loader.sh` mit Whitelist (nur Pfad-Variablen im Klartext, Rest maskiert)
    - Explizite Regel: Subagents erben KEINE Environment-Variablen
 
-   *Quelle: `hooks/session-env-loader.sh:36-66`, `CLAUDE.md` Environment-Isolation Section*
+   Quelle: `hooks/session-env-loader.sh:36-66`, `CLAUDE.md` Environment-Isolation Section
 
 3. **Permission Audit** (`skills/permission-audit/`):
    - Tool-Call-Logging mit 608K an Audit-Daten
    - Deny-Rules in `settings.json`
 
-   *Quelle: `skills/permission-audit/artifacts/` (5 Log-Dateien)*
+   Quelle: `skills/permission-audit/artifacts/` (5 Log-Dateien)
 
 4. **Anti-Halluzination Protocol**:
    - Faktenmodus standardmäßig
    - Quelle-oder-Stille-Regel
    - Sicherheitsstufen (hoch/mittel/niedrig)
 
-   *Quelle: `CLAUDE.md`, Anti-Halluzination Protocol Section*
+   Quelle: `CLAUDE.md`, Anti-Halluzination Protocol Section
 
 **Bewertung:**
 
@@ -286,7 +293,7 @@ Mehrschichtiges Sicherheitskonzept:
 | Business | 11 | Scrum Master, Legal Advisor, WordPress |
 | Domains | 12 | Blockchain, IoT, FinTech, Quant Analysis |
 
-*Quelle: README.md, Alle 10 Kategorien*
+Quelle: README.md, Alle 10 Kategorien
 
 **Stärke:** "One-stop-shop" — für fast jede Technologie gibt es einen spezialisierten Agent.
 
@@ -334,7 +341,7 @@ Mehrschichtiges Sicherheitskonzept:
 - **Contributing Guidelines** — PR-Workflow mit README-Updates
 - **GitHub Actions CI/CD** — Automated Validation
 
-*Quelle: README.md, Installation & Contributing Sections*
+Quelle: README.md, Installation & Contributing Sections
 
 ### 7.2 Unser Projekt
 
@@ -360,11 +367,13 @@ Mehrschichtiges Sicherheitskonzept:
 
 1. **SATE Framework** — Session-Autonomous Task Execution mit 7 harten Invarianten
 2. **Budget Intelligence** — Token-Schätzung pro Action mit Kalibrierungslog
-   ```
+
+   ```text
    | Action 1 | Geschätzt: 20-25K | Tatsächlich: ~22K | Delta: +5% |
    | Action 3 | Geschätzt: 15-20K | Tatsächlich: ~8K  | Delta: -55% |
    ```
-   *Quelle: `action-budget-heuristics.md:38-40`*
+
+   Quelle: `action-budget-heuristics.md:38-40`
 3. **Decision Frontloading** — Strategische Entscheidungen vor Execution erzwingen
 4. **Vault-Integration (ADR-005)** — CLI+Bash Hybrid mit Fallback-Kaskade
 5. **Anti-Halluzination Protocol** — Sicherheitsstufen + Quelle-oder-Stille-Regel
@@ -379,7 +388,7 @@ Mehrschichtiges Sicherheitskonzept:
 
 Beide Projekte sind **nicht konkurrierend, sondern komplementär**:
 
-```
+```text
 ┌─────────────────────────────────┐
 │  VoltAgent: Breite              │
 │  "Welchen Spezialisten brauche  │

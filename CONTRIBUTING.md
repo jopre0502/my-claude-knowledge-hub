@@ -24,7 +24,7 @@ Thank you for your interest in contributing! This guide covers the conventions a
 
 Commit messages follow this format:
 
-```
+```text
 <type>: Short description (max 50 chars)
 
 Optional longer description.
@@ -43,24 +43,28 @@ Co-Authored-By: Your Name <email>
 
 1. Create directory: `skills/<skill-name>/`
 2. Add `SKILL.md` with YAML frontmatter:
+
    ```yaml
    ---
    name: skill-name
    description: "Clear, keyword-rich description of what the skill does and when to use it"
    ---
    ```
+
 3. Keep `SKILL.md` under 500 lines; use supporting files for details
 4. Test the skill in a Claude Code session before submitting
 
 ## Adding a New Command
 
 1. Create `commands/<command-name>.md` with YAML frontmatter:
+
    ```yaml
    ---
    name: command-name
    description: "What the command does"
    ---
    ```
+
 2. Commands are invoked via `/<command-name>` in Claude Code
 
 ## Adding a New Hook

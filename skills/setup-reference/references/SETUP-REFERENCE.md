@@ -1,4 +1,4 @@
-# SETUP-REFERENCE — Auto-generated: 2026-03-05 13:26
+# SETUP-REFERENCE — Auto-generated: 2026-03-05 15:20
 
 Generiert aus Live-System (`~/.claude/`). Nicht manuell bearbeiten.
 
@@ -385,5 +385,5 @@ source ~/.config/secrets/.env-cache
 
 ---
 
-*Generiert: 2026-03-05 13:26 | Script: generate-reference.sh*
+*Generiert: 2026-03-05 15:20 | Script: generate-reference.sh*
 *Naechste Aktualisierung: /refresh-reference ausfuehren*

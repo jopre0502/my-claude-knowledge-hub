@@ -47,6 +47,10 @@
 !hooks/
 !hooks/*
 
+# ===== WHITELIST: Rules =====
+!rules/
+!rules/*
+
 # ===== WHITELIST: Output Styles =====
 !output-styles/
 !output-styles/*

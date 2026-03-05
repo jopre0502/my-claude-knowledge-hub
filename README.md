@@ -60,7 +60,7 @@ git clone https://github.com/jopre0502/my-claude-knowledge-hub.git ~/.claude/
 
 ## Directory Structure
 
-```
+```text
 ~/.claude/
 ├── CLAUDE.md              # Global instructions for Claude Code
 ├── skills/                # 18 skills (session-refresh, task-orchestrator, ...)
