@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-03-11
+
+### Changed
+
+- **Repository renamed** from `my-claude-knowledge-hub` to `claude-persist`
+- **README rewritten** with Painpoint-First structure (Problem → Solution → What's Inside)
+- **Tagline updated** to "Make Claude Code remember. Sessions that persist, tasks that finish, context that never dies."
+- All internal URLs updated in CONTRIBUTING.md, SECURITY.md, CODE_OF_CONDUCT.md
+
+### Added
+
+- New skills: env-init, end-of-day, auto-task plugin
+- GitHub Topics optimized for discoverability
+
 ## [1.0.0] - 2026-03-05
 
 ### Added
@@ -23,4 +37,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub Issue Templates (bug report, feature request)
 - Secret scanning and push protection enabled
 
-[1.0.0]: https://github.com/jopre0502/my-claude-knowledge-hub/releases/tag/v1.0.0
+[1.1.0]: https://github.com/jopre0502/claude-persist/releases/tag/v1.1.0
+[1.0.0]: https://github.com/jopre0502/claude-persist/releases/tag/v1.0.0
